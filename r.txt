@@ -6,3 +6,4 @@ langchain_community
 huggingface_hub 
 requests
 json
+pdfplumber
