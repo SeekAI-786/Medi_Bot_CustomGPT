@@ -2,7 +2,6 @@ import streamlit as st
 from huggingface_hub import InferenceClient
 import requests
 import json
-import pdfplumber  # For extracting text from PDFs
 
 # Hardcoded API keys (Replace with actual keys)
 HF_API_KEY = "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"  # For Hugging Face API integration
@@ -17,7 +16,7 @@ if "pdf_content" not in st.session_state:
 st.title("Medi Bot 🤖💬")
 st.caption("Your personalized medical assistant powered by GPT. Created by Qusai Jamali (22108131) and Muhammad (22108137)")
 
-# Model Selection
+# Model Selection Sidebar
 st.sidebar.subheader("Model Selection")
 available_models = [
     "gemma-mental-health-fine-tune",
@@ -27,21 +26,21 @@ available_models = [
 selected_model = st.sidebar.selectbox("Choose a model:", available_models)
 
 # User Input Section at the bottom
-st.subheader("💬 Chat with the Medi Bot")
+st.subheader("💬 Chat with Medi Bot")
 user_query = st.text_input("Your message:", placeholder="Type your query here...")
 
 # Buttons for response generation and clearing
 col1, col2 = st.columns([1, 0.320])
 with col1:
-    generate_button = st.button("Generate Response")
+    generate_button = st.button("Generate Response", use_container_width=True)
 with col2:
-    clear_button = st.button("Clear Conversation")
+    clear_button = st.button("Clear Conversation History", use_container_width=True)
 
 # Handle Clear Button
 if clear_button:
     st.session_state.conversations = []
     st.session_state.pdf_content = ""
-    st.success("Conversation history cleared..")
+    st.success("Conversation history cleared.")
 
 # Handle Generate Button
 if generate_button:
