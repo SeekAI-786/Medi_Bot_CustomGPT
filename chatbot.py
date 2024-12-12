@@ -41,7 +41,7 @@ with col2:
 if clear_button:
     st.session_state.conversations = []
     st.session_state.pdf_content = ""
-    st.success("Conversation history and PDF content cleared.")
+    st.success("Conversation history cleared.")
 
 # Handle Generate Button
 if generate_button:
@@ -57,26 +57,24 @@ if generate_button:
             "or abusive answers. Be respectful and professional in your responses."
         )
 
-        # Hugging Face API for Yi Chat, Llama, and Phi models
+        query = friendly_instruction + user_query
+
         try:
             client = InferenceClient(api_key=HF_API_KEY)
-            messages = [{"role": "user", "content": user_query}]
-
-            # Handle model-specific conditions
-            if selected_model == "qwen-1.5B-medical-QA":
+            messages = [{"role": "user", "content": query}]
+            
+            if selected_model == "llama-3.2-1B-Lora-Fine_Tune-FineTome":
+                model_name = "unsloth/Llama-3.2-1B-Instruct"  # Update model name for this selection
+                messages = [{"role": "system", "content": "Medical information bot"}] + messages  # Add system message
+                
+            elif selected_model == "qwen-1.5B-medical-QA":
                 model_name = "01-ai/Yi-1.5-34B-Chat"  # Update model name for this selection
                 messages = [{"role": "system", "content": friendly_instruction}] + messages  # Add system message for models that support it
-
-            elif selected_model == "llama-3.2-1B-Lora-Fine_Tune-FineTome":
-                model_name = "meta-llama/Llama-3.2-1B-Instruct"  # Update model name for this selection
-                messages = [{"role": "system", "content": "Medical information bot"}] + messages  # Add system message
-
+                
             elif selected_model == "gemma-mental-health-fine-tune":
                 model_name = "google/gemma-1.1-2b-it"  # Update model name for this selection
-                # Gemma may not support system roles, so just send the user message
-                messages = [{"role": "user", "content": user_query}]
+                messages = [{"role": "user", "content": query}]
 
-            # Call Hugging Face API with the selected model
             completion = client.chat.completions.create(
                 model=model_name, messages=messages, max_tokens=700
             )
