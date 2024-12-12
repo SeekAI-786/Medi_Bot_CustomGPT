@@ -56,8 +56,7 @@ if generate_button:
             "You are a helpful and friendly medical assistant. Please refrain from giving personal, offensive, "
             "or abusive answers. Be respectful and professional in your responses."
         )
-
-        # Hugging Face API for Yi Chat, Llama, and Phi models
+        
         try:
             client = InferenceClient(api_key=HF_API_KEY)
             messages = [{"role": "system", "content": friendly_instruction}, {"role": "user", "content": user_query}]
