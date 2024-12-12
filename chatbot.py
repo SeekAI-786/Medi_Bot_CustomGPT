@@ -2,9 +2,7 @@ import streamlit as st
 from huggingface_hub import InferenceClient
 import requests
 import json
-import pdfplumber  # For extracting text from PDFs
 
-# Hardcoded API keys (Replace with actual keys)
 HF_API_KEY = "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"  # For Hugging Face API integration
 
 # Initialize session state for storing conversations and PDF content
@@ -16,6 +14,9 @@ if "pdf_content" not in st.session_state:
 # App Title and Layout
 st.title("Medi Bot 🤖💬")
 st.caption("Your personalized medical assistant. Created by Qusai Jamali (22108131) and Muhammad (22108137)")
+
+# Display the GitHub link in the caption
+st.markdown("Check out the source code for this project on [GitHub](https://github.com/SeekAI-786/Medi_Bot_CustomGPT)")
 
 # Model Selection
 st.sidebar.subheader("Model Selection")
