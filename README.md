@@ -106,7 +106,7 @@ The web app for interacting with the models is available at:
 
 ## 🔧 Future Enhancements
 - Add support for additional AI models.
-- Implement Fine Tuning for Custom Datasets.
+- Implement More Fine Tuning for Better Accuracy.
 - Provide advanced settings for customizing API parameters.
 
 ---
