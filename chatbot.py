@@ -35,13 +35,13 @@ col1, col2 = st.columns([1, 0.320])
 with col1:
     generate_button = st.button("Generate Response")
 with col2:
-    clear_button = st.button("Clear Conversation History")
+    clear_button = st.button("Clear Conversation")
 
 # Handle Clear Button
 if clear_button:
     st.session_state.conversations = []
     st.session_state.pdf_content = ""
-    st.success("Conversation history and PDF content cleared.")
+    st.success("Conversation history cleared..")
 
 # Handle Generate Button
 if generate_button:
