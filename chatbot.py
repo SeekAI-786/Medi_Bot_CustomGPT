@@ -15,7 +15,7 @@ if "pdf_content" not in st.session_state:
 
 # App Title and Layout
 st.title("Medi Bot 🤖💬")
-st.caption("Your personalized medical assistant powered by GPT. Created by Qusai Jamali (22108131) and Muhammad (22108137)")
+st.caption("Your personalized medical assistant. Created by Qusai Jamali (22108131) and Muhammad (22108137)")
 
 # Model Selection
 st.sidebar.subheader("Model Selection")
