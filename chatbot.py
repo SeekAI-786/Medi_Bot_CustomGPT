@@ -68,7 +68,7 @@ if generate_button:
                 messages = [{"role": "system", "content": "Medical information bot"}] + messages  # Add system message
                 
             elif selected_model == "qwen-1.5B-medical-QA":
-                model_name = "01-ai/Yi-1.5-34B-Chat"  # Update model name for this selection
+                model_name = "Qwen/Qwen2.5-1.5B-Instruct"  # Update model name for this selection
                 messages = [{"role": "system", "content": friendly_instruction}] + messages  # Add system message for models that support it
                 
             elif selected_model == "gemma-mental-health-fine-tune":
