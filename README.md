@@ -124,6 +124,6 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 ## 👤 Author
 **Your Name**  
 - [GitHub](https://github.com/SeekAI-786)  
-- [LinkedIn]([https://linkedin.com/in/yourlinkedin](https://www.linkedin.com/in/mohammad-aun-ali-705852293/)
+- [LinkedIn]([Mohammad-Aun-Ali](https://www.linkedin.com/in/mohammad-aun-ali-705852293/)
 
 ---
