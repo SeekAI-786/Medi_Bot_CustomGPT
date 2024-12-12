@@ -64,15 +64,15 @@ if generate_button:
 
             # Handle different models by applying model-specific settings if needed
             if selected_model == "qwen-1.5B-medical-QA":
-                selected_model == "Yi-1.5-34B-Chat"
+                selected_model = "Yi-1.5-34B-Chat"
                 messages = [{"role": "system", "content": "You are a helpful medical assistant."}] + messages
 
             elif selected_model == "llama-3.2-1B-Lora-Fine_Tune-FineTome":
-                selected_model == "meta-llama/Llama-3.2-1B-Instruct"
+                selected_model = "meta-llama/Llama-3.2-1B-Instruct"
                 messages = [{"role": "system", "content": "Medical information bot"}] + messages
 
             elif selected_model == "gemma-mental-health-fine-tune":
-                selected_model == "google/gemma-1.1-2b-it"
+                selected_model = "google/gemma-1.1-2b-it"
                 messages = [{"role": "system", "content": "Phi bot: Medical queries handler."}] + messages
 
             completion = client.chat.completions.create(
