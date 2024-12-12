@@ -64,7 +64,7 @@ if generate_button:
 
             # Handle model-specific conditions
             if selected_model == "qwen-1.5B-medical-QA":
-                model_name = "Yi-1.5-34B-Chat"  # Update model name for this selection
+                model_name = "01-ai/Yi-1.5-34B-Chat"  # Update model name for this selection
                 messages = [{"role": "system", "content": friendly_instruction}] + messages  # Add system message for models that support it
 
             elif selected_model == "llama-3.2-1B-Lora-Fine_Tune-FineTome":
