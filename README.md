@@ -1,8 +1,8 @@
 ---
 
-# AI Chat Interface with Hugging Face Fine-Tuned Models
+# AI Chat Interface with Hugging Face Fine-Tuned Models on Medical Datasets
 
-This project provides an interactive web application built with **Streamlit**, allowing users to chat with AI models hosted on **Hugging Face**. The interface offers a **demo version** of the AI chat functionality, showcasing how these models can generate responses to medical and mental health-related queries.
+This project provides an interactive web application built with **Streamlit**, allowing users to chat with AI models hosted on **Hugging Face**. The interface offers a **demo version** of the AI chat functionality, showcasing how these models can be fine tuned to generate responses to medical and mental health-related queries.
 
 ---
 
