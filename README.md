@@ -1,12 +1,13 @@
+---
 
-# AI Chat Interface with Hugging Face & Gemini Models
+# AI Chat Interface with Hugging Face Fine-Tuned Models
 
-This project provides an interactive web application built with **Streamlit**, allowing users to chat with various AI models, including those hosted on Hugging Face and Google's Gemini. It features a user-friendly interface, supports multiple AI models, and maintains a conversation history with the option to download prompts and responses.
+This project provides an interactive web application built with **Streamlit**, allowing users to chat with AI models hosted on **Hugging Face**. The interface offers a **demo version** of the AI chat functionality, showcasing how these models can generate responses to medical and mental health-related queries.
 
 ---
 
 ## 🚀 Features
-- **Model Selection**: Choose from a range of AI models, including Hugging Face-hosted models and Gemini.
+- **Model Selection**: Choose from a range of **pre-trained AI models** hosted on Hugging Face fine tune those models for medical and mental health-related tasks.
 - **Dynamic Response Generation**: Send prompts to selected models and receive AI-generated responses.
 - **Conversation History**: Maintain a log of all conversations within a session.
 - **Download Capability**: Download individual prompts and responses as `.txt` files.
@@ -17,9 +18,7 @@ This project provides an interactive web application built with **Streamlit**, a
 
 ## 🛠️ Tech Stack
 - **Frontend**: Streamlit
-- **APIs**:
-  - Hugging Face Inference API
-  - Gemini Model API
+- **APIs**: Hugging Face Inference API
 - **Languages**: Python
 - **Dependencies**: 
   - `streamlit`
@@ -48,10 +47,9 @@ pip install -r requirements.txt
 ```
 
 ### 4. Set Up API Keys
-- Create a `.env` file in the root directory and add your API keys:
+- Create a `.env` file in the root directory and add your Hugging Face API key:
   ```
   HF_API_KEY=<your_huggingface_api_key>
-  GEMINI_API_KEY=<your_gemini_api_key>
   ```
 
 ---
@@ -79,30 +77,36 @@ streamlit run app.py
 
 ---
 
-## 📖 API Information
+## 📖 Hugging Face Models
 
-### Hugging Face Inference API
-- Used for querying various Hugging Face-hosted AI models.
-- Requires a valid Hugging Face API key.
+Here are the **models** hosted on Hugging Face that are used in the demo:
 
-### Gemini API
-- Integrated with the Gemini language model for AI content generation.
-- Requires a valid Gemini API key.
+1. **Llama-3.2-1B-Lora-Fine-Tune-FineTome**  
+   Model URL: [Llama-3.2-1B-Lora-Fine-Tune-FineTome](https://huggingface.co/Muhammad7865253/llama-3.2-1B-Lora-Fine_Tune-FineTome)  
+   - This model excels in handling **medical-related queries** and provides specialized responses for healthcare topics.
+
+2. **Gemma-Mental-Health-Fine-Tune**  
+   Model URL: [Gemma-Mental-Health-Fine-Tune](https://huggingface.co/Muhammad7865253/gemma-mental-health-fine-tune)  
+   - This model is ideal for **mental health-related conversations**, offering insights, therapy suggestions, and emotional support.
+
+3. **Qwen-1.5B-Medical-QA**  
+   Model URL: [Qwen-1.5B-Medical-QA](https://huggingface.co/Muhammad7865253/qwen-1.5B-medical-QA)  
+   - This model is designed for **medical question-answering** tasks, with high accuracy for healthcare-related inquiries.
 
 ---
 
-## 🛡️ Error Handling
-- Checks for empty inputs or API errors.
-- Displays informative messages to guide users when something goes wrong.
+## 🌐 Streamlit Interface
 
----
+The web app for interacting with the models is available at:  
+[Streamlit App URL](https://medibotcustomgpt-eepnvsgmhzcrmzbiuwdgp4.streamlit.app/)
 
+*Note*: Due to limited resources on Streamlit, the **fine-tuned models** could not be hosted directly on the platform. The app demonstrates how the models work via Hugging Face’s API, providing a similar experience.
 
 ---
 
 ## 🔧 Future Enhancements
 - Add support for additional AI models.
-- Implement Fine Tuning For Custom Dataset.
+- Implement Fine Tuning for Custom Datasets.
 - Provide advanced settings for customizing API parameters.
 
 ---
@@ -119,7 +123,7 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 
 ## 👤 Author
 **Your Name**  
-- [GitHub](https://github.com/yourusername)  
-- [LinkedIn](https://linkedin.com/in/yourlinkedin)  
+- [GitHub](https://github.com/SeekAI-786)  
+- [LinkedIn]([https://linkedin.com/in/yourlinkedin](https://www.linkedin.com/in/mohammad-aun-ali-705852293/)
 
 ---
