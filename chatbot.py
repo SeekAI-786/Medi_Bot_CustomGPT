@@ -60,17 +60,21 @@ if generate_button:
         # Hugging Face API for Yi Chat, Llama, and Phi models
         try:
             client = InferenceClient(api_key=HF_API_KEY)
-            messages = [{"role": "system", "content": friendly_instruction}, {"role": "user", "content": user_query}]
+            messages = [{"role": "user", "content": user_query}]
 
             # Handle model-specific conditions
             if selected_model == "qwen-1.5B-medical-QA":
                 model_name = "Yi-1.5-34B-Chat"  # Update model name for this selection
+                messages = [{"role": "system", "content": friendly_instruction}] + messages  # Add system message for models that support it
 
             elif selected_model == "llama-3.2-1B-Lora-Fine_Tune-FineTome":
                 model_name = "meta-llama/Llama-3.2-1B-Instruct"  # Update model name for this selection
+                messages = [{"role": "system", "content": "Medical information bot"}] + messages  # Add system message
 
             elif selected_model == "gemma-mental-health-fine-tune":
                 model_name = "google/gemma-1.1-2b-it"  # Update model name for this selection
+                # Gemma may not support system roles, so just send the user message
+                messages = [{"role": "user", "content": user_query}]
 
             # Call Hugging Face API with the selected model
             completion = client.chat.completions.create(
