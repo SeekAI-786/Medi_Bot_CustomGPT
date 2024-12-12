@@ -2,6 +2,7 @@ import streamlit as st
 from huggingface_hub import InferenceClient
 import requests
 import json
+import pdfplumber  # For extracting text from PDFs
 
 # Hardcoded API keys (Replace with actual keys)
 HF_API_KEY = "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"  # For Hugging Face API integration
@@ -34,13 +35,13 @@ col1, col2 = st.columns([1, 0.320])
 with col1:
     generate_button = st.button("Generate Response")
 with col2:
-    clear_button = st.button("Clear Conversation")
+    clear_button = st.button("Clear Conversation History")
 
 # Handle Clear Button
 if clear_button:
     st.session_state.conversations = []
     st.session_state.pdf_content = ""
-    st.success("Conversation history cleared..")
+    st.success("Conversation history and PDF content cleared.")
 
 # Handle Generate Button
 if generate_button:
@@ -55,26 +56,25 @@ if generate_button:
             "You are a helpful and friendly medical assistant. Please refrain from giving personal, offensive, "
             "or abusive answers. Be respectful and professional in your responses."
         )
-        
+
+        # Hugging Face API for Yi Chat, Llama, and Phi models
         try:
             client = InferenceClient(api_key=HF_API_KEY)
             messages = [{"role": "system", "content": friendly_instruction}, {"role": "user", "content": user_query}]
 
-            # Handle different models by applying model-specific settings if needed
+            # Handle model-specific conditions
             if selected_model == "qwen-1.5B-medical-QA":
-                selected_model = "Yi-1.5-34B-Chat"
-                messages = [{"role": "system", "content": "You are a helpful medical assistant."}] + messages
+                model_name = "Yi-1.5-34B-Chat"  # Update model name for this selection
 
             elif selected_model == "llama-3.2-1B-Lora-Fine_Tune-FineTome":
-                selected_model = "meta-llama/Llama-3.2-1B-Instruct"
-                messages = [{"role": "system", "content": "Medical information bot"}] + messages
+                model_name = "meta-llama/Llama-3.2-1B-Instruct"  # Update model name for this selection
 
             elif selected_model == "gemma-mental-health-fine-tune":
-                selected_model = "google/gemma-1.1-2b-it"
-                messages = [{"role": "system", "content": "Phi bot: Medical queries handler."}] + messages
+                model_name = "google/gemma-1.1-2b-it"  # Update model name for this selection
 
+            # Call Hugging Face API with the selected model
             completion = client.chat.completions.create(
-                model=selected_model, messages=messages, max_tokens=700
+                model=model_name, messages=messages, max_tokens=700
             )
             response = completion.choices[0].message.content
         except Exception as e:
