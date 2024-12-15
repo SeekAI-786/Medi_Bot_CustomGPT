@@ -118,6 +118,7 @@ Contributions are welcome! Feel free to submit a pull request or raise issues fo
 
 ## 📜 License
 This project is licensed under the MIT License. See the `LICENSE` file for details.
+Medi Bot is a demo application designed to showcase the power of large language models (LLMs) and how they can be fine-tuned to suit specific custom applications. This app highlights the incredible potential of AI to be tailored for various domains, demonstrating how advanced machine learning models can be adapted to solve real-world problems and improve efficiency. By leveraging AI, Medi Bot provides insights into how innovative solutions can be developed for multiple industries, offering a glimpse into the future of AI-powered applications.
 
 ---
 
