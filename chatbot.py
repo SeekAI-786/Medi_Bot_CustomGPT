@@ -13,7 +13,7 @@ if "pdf_content" not in st.session_state:
 
 # App Title and Layout
 st.title("Medi Bot 🤖💬")
-st.caption("Your personalized medical assistant. Created by Qusai Jamali (22108131) and Muhammad (22108137)")
+st.caption("Your personalized medical assistant. Created by Abdul Basit (22108101) and Muhammad (22108137)")
 
 # Display the GitHub link in the caption
 st.markdown("Check out the source code for this project on [GitHub](https://github.com/SeekAI-786/Medi_Bot_CustomGPT)")
