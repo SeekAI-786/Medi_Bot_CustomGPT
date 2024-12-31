@@ -3,15 +3,14 @@ import firebase_admin
 from firebase_admin import credentials, auth, firestore
 from huggingface_hub import InferenceClient
 
-# Load Firebase credentials from Streamlit secrets
+# Load Firebase credentials and Hugging Face API key from Streamlit secrets
 firebase_config = dict(st.secrets["firebase"])  # This converts the secrets into a dictionary format
+hf_api_key = st.secrets["api"]["huggingface_api_key"]  # Access the Hugging Face API key from Streamlit secrets
 
 # Initialize Firebase if not already done
 if not firebase_admin._apps:
     cred = credentials.Certificate(firebase_config)  # Pass the dictionary as credentials
     firebase_admin.initialize_app(cred)
-
-
 
 db = firestore.client()  # Firestore for user information
 
@@ -113,7 +112,7 @@ if st.session_state.logged_in:
             query = friendly_instruction + user_query
 
             try:
-                client = InferenceClient(api_key=api_key)
+                client = InferenceClient(api_key=hf_api_key)
                 messages = [{"role": "user", "content": query}]
 
                 if selected_model == "llama-3.2-1B-Lora-Fine_Tune-FineTome":
