@@ -27,8 +27,7 @@ st.markdown(
         justify-content: center;
         align-items: center;
         min-height: 100vh;
-        background-color: #007bff;
-        margin-top: -20px; /* Adjusts for Streamlit's built-in padding */
+        margin: 0; /* Removes extra padding */
     }
     .login-box {
         background: white;
@@ -53,17 +52,6 @@ st.markdown(
         margin-bottom: 1rem;
         border-radius: 10px;
         border: 1px solid #ddd;
-    }
-    button {
-        background-color: #007bff;
-        color: white;
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-    button:hover {
-        background-color: #0056b3;
     }
     </style>
     """,
