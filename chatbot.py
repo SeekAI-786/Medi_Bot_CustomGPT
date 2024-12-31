@@ -22,20 +22,15 @@ st.markdown(
         font-family: 'Arial', sans-serif;
         background-color: #f4f4f9;
     }
-    .centered-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0; /* Removes extra padding */
-    }
     .login-box {
         background: white;
         padding: 2rem;
         border-radius: 10px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         text-align: center;
-        width: 100%;
+        margin-top: 1rem;
+        margin-left: auto;
+        margin-right: auto;
         max-width: 400px;
     }
     .chat-container {
@@ -91,7 +86,6 @@ def login_user(email, password):
 
 # Login/Register Interface
 if not st.session_state.logged_in:
-    st.markdown('<div class="centered-container">', unsafe_allow_html=True)
     st.markdown('<div class="login-box">', unsafe_allow_html=True)
     st.header("Medi Bot 🤖")
     st.subheader("Login/Register")
@@ -111,7 +105,6 @@ if not st.session_state.logged_in:
             if login_successful:
                 st.session_state.logged_in = True
 
-    st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Chatbot Interface
