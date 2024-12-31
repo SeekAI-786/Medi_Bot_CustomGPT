@@ -113,7 +113,6 @@ if not st.session_state.logged_in:
             confirm_password = st.text_input("Confirm Password", type="password")
             if st.button("Register"):
                 register_user(email, password, confirm_password)
-                st.experimental_rerun()
 
         if auth_action == "Login":
             if st.button("Login"):
