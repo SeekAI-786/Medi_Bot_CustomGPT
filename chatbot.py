@@ -48,6 +48,11 @@ st.markdown(
         border-radius: 10px;
         border: 1px solid #ddd;
     }
+    .btn-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -126,8 +131,11 @@ if st.session_state.logged_in:
     selected_model = st.selectbox("Choose a model:", available_models)
 
     user_query = st.text_input("Your message:", placeholder="Type your query here...")
-    generate_button = st.button("Generate Response")
-    clear_button = st.button("Clear Conversation History")
+    col1, col2 = st.columns(2)
+    with col1:
+        generate_button = st.button("Generate Response")
+    with col2:
+        clear_button = st.button("Clear Conversation History")
 
     # Handle Clear Button
     if clear_button:
