@@ -26,8 +26,9 @@ st.markdown(
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
+        min-height: 100vh;
         background-color: #007bff;
+        margin-top: -20px; /* Adjusts for Streamlit's built-in padding */
     }
     .login-box {
         background: white;
