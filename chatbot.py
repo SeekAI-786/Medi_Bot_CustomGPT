@@ -92,25 +92,26 @@ def login_user(email, password):
 # Login/Register Interface
 if not st.session_state.logged_in:
     st.markdown('<div class="centered-container">', unsafe_allow_html=True)
-    with st.container():
-        st.markdown('<div class="login-box">', unsafe_allow_html=True)
-        st.header("Medi Bot 🤖")
-        st.subheader("Login/Register")
+    st.markdown('<div class="login-box">', unsafe_allow_html=True)
+    st.header("Medi Bot 🤖")
+    st.subheader("Login/Register")
 
-        auth_action = st.radio("Select Action", ["Login", "Register"], horizontal=True)
-        email = st.text_input("Email")
-        password = st.text_input("Password", type="password")
+    auth_action = st.radio("Select Action", ["Login", "Register"], horizontal=True)
+    email = st.text_input("Email")
+    password = st.text_input("Password", type="password")
 
-        if auth_action == "Register":
-            confirm_password = st.text_input("Confirm Password", type="password")
-            if st.button("Register"):
-                register_user(email, password, confirm_password)
+    if auth_action == "Register":
+        confirm_password = st.text_input("Confirm Password", type="password")
+        if st.button("Register"):
+            register_user(email, password, confirm_password)
 
-        if auth_action == "Login":
-            if st.button("Login"):
-                if login_user(email, password):
-                    st.experimental_rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+    if auth_action == "Login":
+        if st.button("Login"):
+            login_successful = login_user(email, password)
+            if login_successful:
+                st.session_state.logged_in = True
+
+    st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Chatbot Interface
@@ -119,7 +120,6 @@ if st.session_state.logged_in:
     if st.sidebar.button("Logout"):
         st.session_state.logged_in = False
         st.session_state.user_email = ""
-        st.experimental_rerun()
 
     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
     st.header("Medi Bot 🤖💬")
@@ -138,8 +138,9 @@ if st.session_state.logged_in:
 
     # Handle Clear Button
     if clear_button:
-        st.session_state.conversations = []
-        st.success("Conversation history cleared.")
+        if "conversations" in st.session_state:
+            st.session_state.conversations = []
+            st.success("Conversation history cleared.")
 
     # Handle Generate Button
     if generate_button:
@@ -177,7 +178,6 @@ if st.session_state.logged_in:
                 if "conversations" not in st.session_state:
                     st.session_state.conversations = []
                 st.session_state.conversations.append({"query": user_query, "response": response})
-                st.experimental_rerun()
 
     # Display Chat History
     if "conversations" in st.session_state:
