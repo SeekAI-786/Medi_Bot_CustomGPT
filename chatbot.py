@@ -3,14 +3,15 @@ import firebase_admin
 from firebase_admin import credentials, auth, firestore
 from huggingface_hub import InferenceClient
 
-# Load Firebase configuration from Streamlit secrets
-firebase_config = st.secrets["firebase"]
-api_key = st.secrets["api"]["huggingface_api_key"]
+# Load Firebase credentials from Streamlit secrets
+firebase_config = dict(st.secrets["firebase"])  # This converts the secrets into a dictionary format
 
-# Firebase Initialization
+# Initialize Firebase if not already done
 if not firebase_admin._apps:
-    cred = credentials.Certificate(firebase_config)
+    cred = credentials.Certificate(firebase_config)  # Pass the dictionary as credentials
     firebase_admin.initialize_app(cred)
+
+
 
 db = firestore.client()  # Firestore for user information
 
