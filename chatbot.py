@@ -125,7 +125,7 @@ if st.session_state.logged_in:
 
     available_models = [
         "gemma-mental-health-fine-tune",
-        "qwen-1.5B-medical-QA",
+        "Mistral-1.5B-medical-QA",
         "llama-3.2-1B-Lora-Fine_Tune-FineTome",
     ]
     selected_model = st.selectbox("Choose a model:", available_models)
@@ -162,8 +162,8 @@ if st.session_state.logged_in:
                 if selected_model == "llama-3.2-1B-Lora-Fine_Tune-FineTome":
                     model_name = "unsloth/Llama-3.2-1B-Instruct"
                     messages = [{"role": "system", "content": "Medical information bot"}] + messages
-                elif selected_model == "qwen-1.5B-medical-QA":
-                    model_name = "Qwen/Qwen2.5-1.5B-Instruct"
+                elif selected_model == "Mistral-1.5B-medical-QA":
+                    model_name = "mistralai/Mixtral-8x7B-Instruct-v0.1"
                     messages = [{"role": "system", "content": friendly_instruction}] + messages
                 elif selected_model == "gemma-mental-health-fine-tune":
                     model_name = "google/gemma-1.1-2b-it"
