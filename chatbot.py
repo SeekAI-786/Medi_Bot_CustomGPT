@@ -15,55 +15,7 @@ st.markdown(
         color: #ffffff;
         font-family: Arial, sans-serif;
     }
-    .stTextInput > div > input {
-        background-color: #2c2c2c;
-        color: white;
-        border: 1px solid #444;
-    }
-    .stButton button {
-        background-color: #ff4b4b;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 10px 20px;
-    }
-    .success-message {
-        background-color: #4caf50;
-        color: white;
-        padding: 10px;
-        border-radius: 5px;
-        margin-top: 10px;
-    }
-    .error-message {
-        background-color: #f44336;
-        color: white;
-        padding: 10px;
-        border-radius: 5px;
-        margin-top: 10px;
-    }
-    .tab-container {
-        display: flex;
-        justify-content: space-around;
-        background-color: #1e1e1e;
-        padding: 10px 0;
-        border-bottom: 2px solid #444;
-    }
-    .tab {
-        color: #888;
-        font-weight: bold;
-        padding: 10px 20px;
-        cursor: pointer;
-    }
-    .tab.active {
-        color: white;
-        border-bottom: 2px solid #ff4b4b;
-    }
-    .login-box {
-        background-color: #1e1e1e;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-    }
+    
     </style>
     """,
     unsafe_allow_html=True,
