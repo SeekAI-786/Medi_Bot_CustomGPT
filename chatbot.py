@@ -29,10 +29,6 @@ db = firestore.client()  # Firestore for user information
 st.markdown(
     """
     <style>
-    body {
-        font-family: 'Arial', sans-serif;
-        background-color: #f4f4f9;
-    }
     .login-box {
         background: white;
         padding: 2rem;
