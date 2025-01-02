@@ -1,74 +1,6 @@
-# Imports
-import streamlit as st
-import firebase_admin
-from firebase_admin import credentials, auth, firestore
-from huggingface_hub import InferenceClient
-
-# Load Firebase credentials and Hugging Face API key from Streamlit secrets
-firebase_config = dict(st.secrets["firebase"])  # Converts secrets into a dictionary
-hf_api_key = st.secrets["api"]["huggingface_api_key"]
-
-# Initialize Streamlit session state keys
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-
-if "user_email" not in st.session_state:
-    st.session_state.user_email = ""
-
-if "conversations" not in st.session_state:
-    st.session_state.conversations = []  # Clear conversations for new user login
-
-# Initialize Firebase if not already done
-if not firebase_admin._apps:
-    cred = credentials.Certificate(firebase_config)
-    firebase_admin.initialize_app(cred)
-
-db = firestore.client()  # Initialize Firestore for user management
-
-# CSS styling for professional UI
-st.markdown(
-    """
-    <style>
-    body {
-        font-family: 'Arial', sans-serif;
-        background-color: #ffffff; 
-    }
-    hr {
-        border: 2px solid black;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-# Firebase Authentication Functions
-def register_user(email, password, confirm_password):
-    if password != confirm_password:
-        st.error("Passwords do not match!")
-        return
-    try:
-        user = auth.create_user(email=email, password=password)
-        st.success("User registered successfully! You can now log in.")
-    except Exception as e:
-        st.error(f"Registration error: {e}")
-
-def login_user(email, password):
-    try:
-        user_ref = db.collection("users").where("email", "==", email).stream()
-        if any(user_ref):  # Check if user exists
-            st.session_state.logged_in = True
-            st.session_state.user_email = email
-            st.session_state.conversations = []  # Clear conversations for new login
-            st.success(f"Welcome back, {email}!")
-            return True
-        else:
-            st.error("Invalid credentials or user does not exist.")
-            return False
-    except Exception as e:
-        st.error(f"Login error: {e}")
-
-# Login/Register Interface
+# Check if the user is logged in
 if not st.session_state.logged_in:
+    # Show Login/Register interface
     st.markdown('<div class="login-box">', unsafe_allow_html=True)
     st.header("Medi Bot 🤖")
     st.subheader("Login/Register")
@@ -86,24 +18,25 @@ if not st.session_state.logged_in:
         email = st.text_input("Email")
         password = st.text_input("Password", type="password")
         if st.button("Login"):
-            login_user(email, password)
+            if login_user(email, password):  # Redirects to chatbot if login succeeds
+                st.experimental_rerun()
 
     if auth_action == "Guest Login":
         if st.button("Enter as Guest"):
             st.session_state.logged_in = True
             st.session_state.user_email = "Guest"
-            st.session_state.conversations = []
-            st.success("Logged in as Guest 🎉")
+            st.experimental_rerun()  # Refresh to load chatbot interface
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Chatbot Interface
-if st.session_state.logged_in:
+else:
+    # Show Chatbot interface
     st.sidebar.success(f"Logged in as {st.session_state.user_email}")
     if st.sidebar.button("Logout"):
         st.session_state.logged_in = False
         st.session_state.user_email = ""
         st.session_state.conversations = []
+        st.experimental_rerun()  # Refresh to load login interface
 
     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
     st.header("Medi Bot 🤖💬")
@@ -123,12 +56,10 @@ if st.session_state.logged_in:
     with col2:
         clear_button = st.button("Clear Conversation History")
 
-    # Handle Clear Button
     if clear_button:
         st.session_state.conversations = []
         st.success("Conversation history cleared.")
 
-    # Handle Generate Button
     if generate_button:
         if not user_query.strip():
             st.warning("Please enter a message.")
@@ -163,14 +94,13 @@ if st.session_state.logged_in:
             if response:
                 st.session_state.conversations.append({"query": user_query, "response": response})
 
-    # Display Chat History with Bold Separators
     if st.session_state.conversations:
         st.subheader("📝 Conversation History")
         for convo in st.session_state.conversations:
             st.markdown('<div class="chat-response">', unsafe_allow_html=True)
             st.write(f"**You:** {convo['query']}")
             st.write(f"**Medi Bot:** {convo['response']}")
-            st.markdown('<hr>', unsafe_allow_html=True)  # Bold separator line
+            st.markdown('<hr>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
