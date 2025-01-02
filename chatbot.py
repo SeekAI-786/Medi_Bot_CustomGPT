@@ -33,17 +33,6 @@ st.markdown(
         font-family: 'Arial', sans-serif;
         background-color: #ffffff; 
         }
-    .login-box {
-        background: white;
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        text-align: center;
-        margin-top: 1rem;
-        margin-left: auto;
-        margin-right: auto;
-        max-width: 400px;
-    }
     .chat-container {
         margin: 2rem auto;
         max-width: 800px;
