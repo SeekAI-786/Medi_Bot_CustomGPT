@@ -6,65 +6,71 @@ if "logged_in" not in st.session_state:
 if "username" not in st.session_state:
     st.session_state.username = ""
 
-# CSS Styling for the dark-themed UI
+# CSS Styling for the light-themed UI
 st.markdown(
     """
     <style>
     body {
-        background-color: #121212;
-        color: #ffffff;
+        background-color: #f9f9f9;
+        color: #333333;
         font-family: Arial, sans-serif;
     }
     .stTextInput > div > input {
-        background-color: #2c2c2c;
-        color: white;
-        border: 1px solid #444;
+        background-color: #ffffff;
+        color: #333333;
+        border: 1px solid #cccccc;
+        border-radius: 5px;
     }
     .stButton button {
-        background-color: #ff4b4b;
+        background-color: #007bff;
         color: white;
         border: none;
         border-radius: 5px;
         padding: 10px 20px;
+        cursor: pointer;
+    }
+    .stButton button:hover {
+        background-color: #0056b3;
     }
     .success-message {
-        background-color: #4caf50;
-        color: white;
+        background-color: #d4edda;
+        color: #155724;
         padding: 10px;
         border-radius: 5px;
+        border: 1px solid #c3e6cb;
         margin-top: 10px;
     }
     .error-message {
-        background-color: #f44336;
-        color: white;
+        background-color: #f8d7da;
+        color: #721c24;
         padding: 10px;
         border-radius: 5px;
+        border: 1px solid #f5c6cb;
         margin-top: 10px;
     }
     .tab-container {
         display: flex;
         justify-content: space-around;
-        background-color: #1e1e1e;
+        background-color: #ffffff;
         padding: 10px 0;
-        border-bottom: 2px solid #444;
+        border-bottom: 2px solid #cccccc;
     }
     .tab {
-        color: #888;
+        color: #555555;
         font-weight: bold;
         padding: 10px 20px;
         cursor: pointer;
     }
     .tab.active {
-        color: white;
-        border-bottom: 2px solid #ff4b4b;
+        color: #007bff;
+        border-bottom: 2px solid #007bff;
     }
     .login-box {
-        background-color: #1e1e1e;
+        background-color: #ffffff;
         padding: 20px;
         border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
-    
     </style>
     """,
     unsafe_allow_html=True,
