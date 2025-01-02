@@ -62,14 +62,7 @@ st.markdown(
         border: 1px solid #f5c6cb;
         margin-top: 10px;
     }
-    .login-box {
-        background-color: #ffffff;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        margin: 0 auto;
-        max-width: 400px;
-    }
+    
     </style>
     """,
     unsafe_allow_html=True,
