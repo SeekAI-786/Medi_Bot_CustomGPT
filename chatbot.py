@@ -23,6 +23,8 @@ if not firebase_admin._apps:
     cred = credentials.Certificate(firebase_config)
     firebase_admin.initialize_app(cred)
 
+db = firestore.client()  # Initialize Firestore for user management
+
 # CSS styling for professional UI
 st.markdown(
     """
@@ -30,6 +32,9 @@ st.markdown(
     body {
         font-family: 'Arial', sans-serif;
         background-color: #ffffff; 
+    }
+    hr {
+        border: 2px solid black;
     }
     </style>
     """,
@@ -154,14 +159,14 @@ if st.session_state.logged_in:
             if response:
                 st.session_state.conversations.append({"query": user_query, "response": response})
 
-    # Display Chat History with Separators
+    # Display Chat History with Bold Separators
     if st.session_state.conversations:
         st.subheader("📝 Conversation History")
         for convo in st.session_state.conversations:
             st.markdown('<div class="chat-response">', unsafe_allow_html=True)
             st.write(f"**You:** {convo['query']}")
             st.write(f"**Medi Bot:** {convo['response']}")
-            st.markdown('<hr>', unsafe_allow_html=True)  # Separator between messages
+            st.markdown('<hr>', unsafe_allow_html=True)  # Bold separator line
             st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
