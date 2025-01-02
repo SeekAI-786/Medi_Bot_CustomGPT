@@ -33,14 +33,6 @@ st.markdown(
         font-family: 'Arial', sans-serif;
         background-color: #ffffff; 
         }
-    .chat-container {
-        margin: 2rem auto;
-        max-width: 800px;
-        background: white;
-        padding: 1.5rem;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
     .chat-response {
         background: #f9f9f9;
         padding: 1rem;
