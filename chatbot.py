@@ -33,13 +33,7 @@ st.markdown(
         font-family: 'Arial', sans-serif;
         background-color: #ffffff; 
         }
-    .chat-response {
-        background: #f9f9f9;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        border-radius: 10px;
-        border: 1px solid #ddd;
-    }
+   
     </style>
     """,
     unsafe_allow_html=True,
