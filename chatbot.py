@@ -25,44 +25,21 @@ if not firebase_admin._apps:
 
 db = firestore.client()  # Initialize Firestore for user management
 
-# CSS styling for light theme
+# CSS styling for professional UI
 st.markdown(
     """
     <style>
     body {
-        background-color: #f9f9f9;
-        color: #333333;
-        font-family: Arial, sans-serif;
+        font-family: 'Arial', sans-serif;
+        background-color: #ffffff; 
     }
-   
-    .stButton button {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 10px 20px;
-        cursor: pointer;
+    hr {
+        border: 2px solid black;
     }
-    .stButton button:hover {
-        background-color: #0056b3;
+    .login-box, .chat-container {
+        margin: 0 auto;
+        max-width: 600px;
     }
-    .success-message {
-        background-color: #d4edda;
-        color: #155724;
-        padding: 10px;
-        border-radius: 5px;
-        border: 1px solid #c3e6cb;
-        margin-top: 10px;
-    }
-    .error-message {
-        background-color: #f8d7da;
-        color: #721c24;
-        padding: 10px;
-        border-radius: 5px;
-        border: 1px solid #f5c6cb;
-        margin-top: 10px;
-    }
-    
     </style>
     """,
     unsafe_allow_html=True,
@@ -119,7 +96,7 @@ if not st.session_state.logged_in:
         if st.button("Login"):
             login_successful = login_user(email, password)
             if login_successful:
-                st.session_state.logged_in = True
+                st.experimental_rerun()  # Immediately reload the app state to reflect the login
 
     elif selected_tab == "Guest login":
         st.subheader("Continue as a Guest")
@@ -127,16 +104,17 @@ if not st.session_state.logged_in:
             st.session_state.logged_in = True
             st.session_state.user_email = "Guest"
             st.success("Logged in as Guest 🎉")
+            st.experimental_rerun()  # Immediately reload the app state to reflect the login
 
     st.markdown('</div>', unsafe_allow_html=True)
-
-# Chatbot Interface
-if st.session_state.logged_in:
+else:
+    # Chatbot Interface
     st.sidebar.success(f"Logged in as {st.session_state.user_email}")
     if st.sidebar.button("Logout"):
         st.session_state.logged_in = False
         st.session_state.user_email = ""
         st.session_state.conversations = []
+        st.experimental_rerun()  # Reload app to reflect logout
 
     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
     st.header("Medi Bot 🤖💬")
