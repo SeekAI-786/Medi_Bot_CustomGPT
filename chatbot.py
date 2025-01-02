@@ -36,6 +36,21 @@ st.markdown(
     hr {
         border: 2px solid black;
     }
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 70vh;
+        overflow-y: auto;
+        margin-bottom: 10px;
+    }
+    .input-container {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background-color: #f9f9f9;
+        padding: 10px;
+        border-top: 1px solid #ddd;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -116,6 +131,19 @@ if st.session_state.logged_in:
     ]
     selected_model = st.selectbox("Choose a model:", available_models)
 
+    if st.session_state.conversations:
+        st.subheader("📝 Conversation History")
+        for convo in st.session_state.conversations:
+            st.markdown('<div class="chat-response">', unsafe_allow_html=True)
+            st.write(f"**You:** {convo['query']}")
+            st.write(f"**Medi Bot:** {convo['response']}")
+            st.markdown('<hr>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Input container at the bottom
+    st.markdown('<div class="input-container">', unsafe_allow_html=True)
     user_query = st.text_input("Your message:", placeholder="Type your query here...")
     col1, col2 = st.columns(2)
     with col1:
@@ -162,15 +190,5 @@ if st.session_state.logged_in:
 
             if response:
                 st.session_state.conversations.append({"query": user_query, "response": response})
-
-    # Display Chat History with Bold Separators
-    if st.session_state.conversations:
-        st.subheader("📝 Conversation History")
-        for convo in st.session_state.conversations:
-            st.markdown('<div class="chat-response">', unsafe_allow_html=True)
-            st.write(f"**You:** {convo['query']}")
-            st.write(f"**Medi Bot:** {convo['response']}")
-            st.markdown('<hr>', unsafe_allow_html=True)  # Bold separator line
-            st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
