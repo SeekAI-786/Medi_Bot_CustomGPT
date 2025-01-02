@@ -34,12 +34,7 @@ st.markdown(
         color: #333333;
         font-family: Arial, sans-serif;
     }
-    .stTextInput > div > input {
-        background-color: #ffffff;
-        color: #333333;
-        border: 1px solid #cccccc;
-        border-radius: 5px;
-    }
+   
     .stButton button {
         background-color: #007bff;
         color: white;
