@@ -1,3 +1,4 @@
+# Initial Imports
 import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
@@ -88,6 +89,9 @@ def login_user(email, password):
             return False
     except Exception as e:
         st.error(f"Login error: {e}")
+
+# Ensure there is no content or layout before components
+st.empty()  # Clear any implicit Streamlit placeholders
 
 # Login/Register Interface
 if not st.session_state.logged_in:
