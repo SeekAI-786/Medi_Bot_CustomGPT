@@ -36,10 +36,6 @@ st.markdown(
     hr {
         border: 2px solid black;
     }
-    .login-box, .chat-container {
-        margin: 0 auto;
-        max-width: 600px;
-    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -71,50 +67,43 @@ def login_user(email, password):
     except Exception as e:
         st.error(f"Login error: {e}")
 
-# Redesigned Login/Register Interface
+# Login/Register Interface
 if not st.session_state.logged_in:
     st.markdown('<div class="login-box">', unsafe_allow_html=True)
     st.header("Medi Bot 🤖")
     st.subheader("Login/Register")
 
-    # Tab-based layout for actions
-    tabs = ["Login to existing account", "Create new account", "Guest login"]
-    selected_tab = st.radio("", tabs, horizontal=True)
+    auth_action = st.radio("Select Action", ["Login", "Register", "Guest Login"], horizontal=True)
 
-    if selected_tab == "Create new account":
-        st.subheader("Create a New Account")
-        email = st.text_input("Email", key="register_email")
-        password = st.text_input("Password", type="password", key="register_password")
+    if auth_action == "Register":
+        email = st.text_input("Email")
+        password = st.text_input("Password", type="password")
         confirm_password = st.text_input("Confirm Password", type="password")
         if st.button("Register"):
             register_user(email, password, confirm_password)
 
-    elif selected_tab == "Login to existing account":
-        st.subheader("Login to Your Account")
-        email = st.text_input("Email", key="login_email")
-        password = st.text_input("Password", type="password", key="login_password")
+    if auth_action == "Login":
+        email = st.text_input("Email")
+        password = st.text_input("Password", type="password")
         if st.button("Login"):
-            login_successful = login_user(email, password)
-            if login_successful:
-                st.experimental_rerun()  # Immediately reload the app state to reflect the login
+            login_user(email, password)
 
-    elif selected_tab == "Guest login":
-        st.subheader("Continue as a Guest")
+    if auth_action == "Guest Login":
         if st.button("Enter as Guest"):
             st.session_state.logged_in = True
             st.session_state.user_email = "Guest"
+            st.session_state.conversations = []
             st.success("Logged in as Guest 🎉")
-            st.experimental_rerun()  # Immediately reload the app state to reflect the login
 
     st.markdown('</div>', unsafe_allow_html=True)
-else:
-    # Chatbot Interface
+
+# Chatbot Interface
+if st.session_state.logged_in:
     st.sidebar.success(f"Logged in as {st.session_state.user_email}")
     if st.sidebar.button("Logout"):
         st.session_state.logged_in = False
         st.session_state.user_email = ""
         st.session_state.conversations = []
-        st.experimental_rerun()  # Reload app to reflect logout
 
     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
     st.header("Medi Bot 🤖💬")
@@ -174,12 +163,14 @@ else:
             if response:
                 st.session_state.conversations.append({"query": user_query, "response": response})
 
-    # Display Chat History
+    # Display Chat History with Bold Separators
     if st.session_state.conversations:
         st.subheader("📝 Conversation History")
         for convo in st.session_state.conversations:
+            st.markdown('<div class="chat-response">', unsafe_allow_html=True)
             st.write(f"**You:** {convo['query']}")
             st.write(f"**Medi Bot:** {convo['response']}")
-            st.markdown("<hr>", unsafe_allow_html=True)
+            st.markdown('<hr>', unsafe_allow_html=True)  # Bold separator line
+            st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
