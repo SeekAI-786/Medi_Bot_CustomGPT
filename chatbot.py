@@ -59,11 +59,6 @@ st.markdown(
         border-radius: 10px;
         border: 1px solid #ddd;
     }
-    .btn-container {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 1rem;
-    }
     </style>
     """,
     unsafe_allow_html=True,
