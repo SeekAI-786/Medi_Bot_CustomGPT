@@ -16,14 +16,12 @@ if "user_email" not in st.session_state:
     st.session_state.user_email = ""
 
 if "conversations" not in st.session_state:
-    st.session_state.conversations = []
+    st.session_state.conversations = []  # Clear conversations for new user login
 
 # Initialize Firebase if not already done
 if not firebase_admin._apps:
     cred = credentials.Certificate(firebase_config)
     firebase_admin.initialize_app(cred)
-
-db = firestore.client()  # Firestore for user information
 
 # CSS styling for professional UI
 st.markdown(
@@ -32,8 +30,7 @@ st.markdown(
     body {
         font-family: 'Arial', sans-serif;
         background-color: #ffffff; 
-        }
-   
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -46,7 +43,6 @@ def register_user(email, password, confirm_password):
         return
     try:
         user = auth.create_user(email=email, password=password)
-        db.collection("users").document(user.uid).set({"email": email})
         st.success("User registered successfully! You can now log in.")
     except Exception as e:
         st.error(f"Registration error: {e}")
@@ -57,6 +53,7 @@ def login_user(email, password):
         if any(user_ref):  # Check if user exists
             st.session_state.logged_in = True
             st.session_state.user_email = email
+            st.session_state.conversations = []  # Clear conversations for new login
             st.success(f"Welcome back, {email}!")
             return True
         else:
@@ -97,6 +94,7 @@ if st.session_state.logged_in:
     if st.sidebar.button("Logout"):
         st.session_state.logged_in = False
         st.session_state.user_email = ""
+        st.session_state.conversations = []
 
     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
     st.header("Medi Bot 🤖💬")
@@ -156,13 +154,14 @@ if st.session_state.logged_in:
             if response:
                 st.session_state.conversations.append({"query": user_query, "response": response})
 
-    # Display Chat History
+    # Display Chat History with Separators
     if st.session_state.conversations:
         st.subheader("📝 Conversation History")
         for convo in st.session_state.conversations:
             st.markdown('<div class="chat-response">', unsafe_allow_html=True)
             st.write(f"**You:** {convo['query']}")
             st.write(f"**Medi Bot:** {convo['response']}")
+            st.markdown('<hr>', unsafe_allow_html=True)  # Separator between messages
             st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
