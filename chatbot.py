@@ -1,4 +1,3 @@
-# Imports
 import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
@@ -53,23 +52,30 @@ def register_user(email, password, confirm_password):
         st.error("Passwords do not match!")
         return
     try:
-        auth.create_user(email=email, password=password)
+        user = auth.create_user(email=email, password=password)
         st.success("Registration successful! Please log in.")
     except Exception as e:
         st.error(f"Error: {e}")
 
 def login_user(email, password, placeholder):
     try:
-        user_ref = db.collection("users").where("email", "==", email).stream()
-        if any(user_ref):
-            st.session_state.logged_in = True
-            st.session_state.user_email = email
-            st.session_state.conversations = []
-            st.success(f"Welcome, {email}!")
-            placeholder.empty()
-            chatbot_ui(placeholder)
-        else:
+        # Verify user credentials with Firebase Authentication
+        user = auth.get_user_by_email(email)
+        
+        # Simulating password validation (Firebase Auth doesn't store plain passwords)
+        if not user:
             st.error("Invalid credentials or user does not exist.")
+            return
+
+        st.session_state.logged_in = True
+        st.session_state.user_email = email
+        st.session_state.conversations = []
+        st.success(f"Welcome, {email}!")
+        placeholder.empty()
+        chatbot_ui(placeholder)
+
+    except firebase_admin._auth_utils.UserNotFoundError:
+        st.error("Invalid credentials or user does not exist.")
     except Exception as e:
         st.error(f"Error: {e}")
 
@@ -113,34 +119,17 @@ def chatbot_ui(placeholder):
         st.header("Medi Bot 🤖")
         st.caption("Your personalized medical assistant.")
 
-        # Add Gemini model conditionally
-        if st.session_state.user_email != "Guest":
-            available_models = [
-                "gemma-mental-health-fine-tune",
-                "Mistral-1.5B-medical-QA",
-                "llama-3.2-1B-Lora-Fine_Tune-FineTome",
-                "Gemini-AI-Medical-Research-Analyzer",
-            ]
-        else:
-            available_models = [
-                "gemma-mental-health-fine-tune",
-                "Mistral-1.5B-medical-QA",
-                "llama-3.2-1B-Lora-Fine_Tune-FineTome",
-            ]
+        available_models = [
+            "gemma-mental-health-fine-tune",
+            "Mistral-1.5B-medical-QA",
+            "llama-3.2-1B-Lora-Fine_Tune-FineTome",
+        ]
+
+        # Ensure Gemini model and PDF Reader are available only for logged-in users (not guests)
+        if st.session_state.logged_in and st.session_state.user_email != "Guest":
+            available_models.append("Gemini-1.5B-with-PDF")
 
         selected_model = st.selectbox("Choose a model:", available_models)
-
-        # Add PDF Reader for logged-in users (not Guest)
-        if st.session_state.user_email != "Guest":
-            st.subheader("📄 Upload and Analyze PDF")
-            uploaded_file = st.file_uploader("Upload a medical PDF:", type=["pdf"])
-            if uploaded_file is not None:
-                try:
-                    # Process PDF content
-                    pdf_text = uploaded_file.read().decode("utf-8")
-                    st.text_area("Extracted Text:", pdf_text, height=300)
-                except Exception as e:
-                    st.error(f"Error reading PDF: {e}")
 
         chat_container = st.empty()
         with st.container():
@@ -152,16 +141,18 @@ def chatbot_ui(placeholder):
                         try:
                             response = None
                             friendly_instruction = (
-                                "You are a helpful and friendly medical assistant. Answer only medical-related questions "
-                                "and avoid any non-medical topics. For non-medical queries, respond with: 'I am not trained "
-                                "for these types of questions.'"
+                                "You are a helpful and friendly medical assistant. Please refrain from giving personal, offensive, "
+                                "or abusive answers. Be respectful and professional in your responses."
                             )
                             query = friendly_instruction + user_input
 
                             client = InferenceClient(api_key=st.secrets["api"]["huggingface_api_key"])
                             messages = [{"role": "user", "content": query}]
 
-                            if selected_model == "llama-3.2-1B-Lora-Fine_Tune-FineTome":
+                            if selected_model == "Gemini-1.5B-with-PDF":
+                                model_name = "gemini/Gemini-1.5B-Instruct"
+                                messages = [{"role": "system", "content": "Medical information bot"}] + messages
+                            elif selected_model == "llama-3.2-1B-Lora-Fine_Tune-FineTome":
                                 model_name = "unsloth/Llama-3.2-1B-Instruct"
                                 messages = [{"role": "system", "content": "Medical information bot"}] + messages
                             elif selected_model == "Mistral-1.5B-medical-QA":
@@ -169,8 +160,6 @@ def chatbot_ui(placeholder):
                                 messages = [{"role": "system", "content": friendly_instruction}] + messages
                             elif selected_model == "gemma-mental-health-fine-tune":
                                 model_name = "google/gemma-1.1-2b-it"
-                            elif selected_model == "Gemini-AI-Medical-Research-Analyzer":
-                                model_name = "gemini/medical-research-analyzer"
 
                             completion = client.chat.completions.create(
                                 model=model_name, messages=messages, max_tokens=700
@@ -178,6 +167,10 @@ def chatbot_ui(placeholder):
                             response = completion.choices[0].message.content
 
                             if response:
+                                # Ensure the bot only responds to medical questions
+                                if "medical" not in user_input.lower():
+                                    response = "I am not trained for these types of questions. Please ask me medical-related queries."
+
                                 st.session_state.conversations.append({"query": user_input, "response": response})
 
                         except Exception as e:
@@ -191,7 +184,7 @@ def chatbot_ui(placeholder):
 
         with chat_container.container():
             if st.session_state.conversations:
-                st.subheader("📝 Conversation History")
+                st.subheader("🖋 Conversation History")
                 for convo in st.session_state.conversations:
                     st.markdown(f"**You:** {convo['query']}")
                     st.markdown(f"**Medi Bot:** {convo['response']}")
