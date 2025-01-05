@@ -113,12 +113,34 @@ def chatbot_ui(placeholder):
         st.header("Medi Bot 🤖")
         st.caption("Your personalized medical assistant.")
 
-        available_models = [
-            "gemma-mental-health-fine-tune",
-            "Mistral-1.5B-medical-QA",
-            "llama-3.2-1B-Lora-Fine_Tune-FineTome",
-        ]
+        # Add Gemini model conditionally
+        if st.session_state.user_email != "Guest":
+            available_models = [
+                "gemma-mental-health-fine-tune",
+                "Mistral-1.5B-medical-QA",
+                "llama-3.2-1B-Lora-Fine_Tune-FineTome",
+                "Gemini-AI-Medical-Research-Analyzer",
+            ]
+        else:
+            available_models = [
+                "gemma-mental-health-fine-tune",
+                "Mistral-1.5B-medical-QA",
+                "llama-3.2-1B-Lora-Fine_Tune-FineTome",
+            ]
+
         selected_model = st.selectbox("Choose a model:", available_models)
+
+        # Add PDF Reader for logged-in users (not Guest)
+        if st.session_state.user_email != "Guest":
+            st.subheader("📄 Upload and Analyze PDF")
+            uploaded_file = st.file_uploader("Upload a medical PDF:", type=["pdf"])
+            if uploaded_file is not None:
+                try:
+                    # Process PDF content
+                    pdf_text = uploaded_file.read().decode("utf-8")
+                    st.text_area("Extracted Text:", pdf_text, height=300)
+                except Exception as e:
+                    st.error(f"Error reading PDF: {e}")
 
         chat_container = st.empty()
         with st.container():
@@ -130,8 +152,9 @@ def chatbot_ui(placeholder):
                         try:
                             response = None
                             friendly_instruction = (
-                                "You are a helpful and friendly medical assistant. Please refrain from giving personal, offensive, "
-                                "or abusive answers. Be respectful and professional in your responses."
+                                "You are a helpful and friendly medical assistant. Answer only medical-related questions "
+                                "and avoid any non-medical topics. For non-medical queries, respond with: 'I am not trained "
+                                "for these types of questions.'"
                             )
                             query = friendly_instruction + user_input
 
@@ -146,6 +169,8 @@ def chatbot_ui(placeholder):
                                 messages = [{"role": "system", "content": friendly_instruction}] + messages
                             elif selected_model == "gemma-mental-health-fine-tune":
                                 model_name = "google/gemma-1.1-2b-it"
+                            elif selected_model == "Gemini-AI-Medical-Research-Analyzer":
+                                model_name = "gemini/medical-research-analyzer"
 
                             completion = client.chat.completions.create(
                                 model=model_name, messages=messages, max_tokens=700
