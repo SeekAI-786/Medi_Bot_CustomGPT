@@ -124,20 +124,21 @@ def chatbot_ui(placeholder):
 
         chat_container = st.empty()
         with st.container():
-            # Use st.text_input consistently and maintain state for the field
-            user_input = st.text_input("Your message:", placeholder="Type your query here...", key="user_input")
+            # Use `st.text_input` without the key binding and rely on session state to store user input
+            user_input = st.text_input("Your message:", placeholder="Type your query here...")
+            st.session_state.user_input = user_input  # Store the value in session state
             
             col1, col2 = st.columns([3, 1])
             with col1:
                 if st.button("Generate Response"):
-                    if user_input.strip():
+                    if st.session_state.user_input.strip():
                         try:
                             response = None
                             friendly_instruction = (
                                 "You are a helpful and friendly medical assistant. Please refrain from giving personal, offensive, "
                                 "or abusive answers. Be respectful and professional in your responses."
                             )
-                            query = friendly_instruction + user_input
+                            query = friendly_instruction + st.session_state.user_input
 
                             client = InferenceClient(api_key=st.secrets["api"]["huggingface_api_key"])
                             messages = [{"role": "user", "content": query}]
@@ -157,7 +158,7 @@ def chatbot_ui(placeholder):
                             response = completion.choices[0].message.content
 
                             if response:
-                                st.session_state.conversations.append({"query": user_input, "response": response})
+                                st.session_state.conversations.append({"query": st.session_state.user_input, "response": response})
 
                             # Reset the input field after sending
                             st.session_state.user_input = ""
