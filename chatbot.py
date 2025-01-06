@@ -1,9 +1,8 @@
-import os
+import streamlit as st
 import pyrebase
+from huggingface_hub import InferenceClient
 import requests
 import json
-import streamlit as st
-from huggingface_hub import InferenceClient
 import PyPDF2
 
 # Firebase Configuration
@@ -62,10 +61,11 @@ def register_user(email, password, confirm_password):
         st.error("Passwords do not match!")
         return
     try:
-        auth.create_user_with_email_and_password(email, password)
+        user = auth.create_user_with_email_and_password(email, password)
         st.success("Registration successful! Please log in.")
     except Exception as e:
         st.error(f"Error: {e}")
+
 
 def login_user(email, password, placeholder):
     try:
@@ -78,6 +78,7 @@ def login_user(email, password, placeholder):
         chatbot_ui(placeholder)
     except Exception as e:
         st.error(f"Error: {e}")
+
 
 def login_ui(placeholder):
     with placeholder.container():
@@ -106,6 +107,7 @@ def login_ui(placeholder):
                 placeholder.empty()
                 chatbot_ui(placeholder)
 
+
 def chatbot_ui(placeholder):
     with placeholder.container():
         st.sidebar.success(f"Logged in as {st.session_state.user_email}")
@@ -125,26 +127,11 @@ def chatbot_ui(placeholder):
             "llama-3.2-1B-Lora-Fine_Tune-FineTome",
         ]
 
-        if st.session_state.logged_in and st.session_state.user_email != "Guest":
-            available_models.append("Gemini-1.5B-with-PDF")
-
         selected_model = st.selectbox("Choose a model:", available_models)
-
-        pdf_context = ""
-        if selected_model == "Gemini-1.5B-with-PDF":
-            uploaded_file = st.file_uploader("Upload a PDF for question-answering:", type="pdf")
-            if uploaded_file:
-                try:
-                    pdf_reader = PyPDF2.PdfReader(uploaded_file)
-                    pdf_context = " ".join([page.extract_text() for page in pdf_reader.pages])
-                    st.success("PDF content has been loaded successfully!")
-                except Exception as e:
-                    st.error(f"Failed to read PDF: {e}")
 
         chat_container = st.empty()
         with st.container():
             user_input = st.text_input("Your message:", placeholder="Type your query here...")
-
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("Generate Response"):
@@ -152,27 +139,19 @@ def chatbot_ui(placeholder):
                         try:
                             response = None
                             query = f"Medical assistant:\n\n{user_input}"
-                            if pdf_context:
-                                query = pdf_context + "\n\n" + query
 
-                            if selected_model == "Gemini-1.5B-with-PDF":
-                                gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
-                                payload = {"contents": [{"parts": [{"text": query}]}]}
-                                headers = {
-                                    "Authorization": f"Bearer {st.secrets['api']['gemini_api_key']}",
-                                    "Content-Type": "application/json",
-                                }
-                                response = requests.post(
-                                    gemini_url, headers=headers, data=json.dumps(payload)
-                                )
-                                if response.status_code == 200:
-                                    res_data = response.json()
-                                    if res_data and "contents" in res_data:
-                                        response = res_data["contents"][0]["parts"][0]["text"]
-                                    else:
-                                        response = "Unexpected response from Gemini model."
-                                else:
-                                    response = f"Gemini Model error: {response.status_code}"
+                            # Removed the PDF context handling for the Gemini model
+                            
+                            # Now, process the query based on selected model
+                            if selected_model == "Mistral-1.5B-medical-QA":
+                                # Replace this with your call to the selected model
+                                response = "Mistral model response here."
+
+                            elif selected_model == "gemma-mental-health-fine-tune":
+                                response = "Gemma mental health fine-tuned model response here."
+
+                            elif selected_model == "llama-3.2-1B-Lora-Fine_Tune-FineTome":
+                                response = "Llama fine-tuned model response here."
 
                             st.session_state.conversations.append({"query": user_input, "response": response})
 
@@ -192,6 +171,7 @@ def chatbot_ui(placeholder):
                     st.markdown(f"**You:** {convo['query']}")
                     st.markdown(f"**Medi Bot:** {convo['response']}")
                     st.markdown("---")
+
 
 # Main App Logic
 placeholder = st.empty()
