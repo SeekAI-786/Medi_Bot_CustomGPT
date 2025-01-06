@@ -108,6 +108,7 @@ def chatbot_ui(placeholder):
             st.session_state.logged_in = False
             st.session_state.user_email = ""
             st.session_state.conversations = []
+            st.session_state.user_input = ""  # Reset input on logout
             placeholder.empty()
             login_ui(placeholder)
 
@@ -123,8 +124,8 @@ def chatbot_ui(placeholder):
 
         chat_container = st.empty()
         with st.container():
-            # Use `st.text_input` with a session state user input control
-            user_input = st.text_input("Your message:", value=st.session_state.user_input, placeholder="Type your query here...")
+            # Use st.text_input consistently and maintain state for the field
+            user_input = st.text_input("Your message:", placeholder="Type your query here...", key="user_input")
             
             col1, col2 = st.columns([3, 1])
             with col1:
@@ -158,9 +159,8 @@ def chatbot_ui(placeholder):
                             if response:
                                 st.session_state.conversations.append({"query": user_input, "response": response})
 
-                            # Manually reset input after the response
+                            # Reset the input field after sending
                             st.session_state.user_input = ""
-                            st.experimental_rerun()  # Ensure the field resets and page re-renders without affecting layout
 
                         except Exception as e:
                             st.error(f"Error: {e}")
