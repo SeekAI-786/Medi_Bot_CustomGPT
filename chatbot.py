@@ -1,15 +1,21 @@
 import streamlit as st
-import firebase_admin
-from firebase_admin import credentials, auth, firestore
+import pyrebase
 from huggingface_hub import InferenceClient
 
-# Firebase Initialization
-firebase_config = dict(st.secrets["firebase"])
-if not firebase_admin._apps:
-    cred = credentials.Certificate(firebase_config)
-    firebase_admin.initialize_app(cred)
+# Firebase Configuration
+firebase_config = {
+    "apiKey": st.secrets["firebase"]["apiKey"],
+    "authDomain": st.secrets["firebase"]["authDomain"],
+    "projectId": st.secrets["firebase"]["projectId"],
+    "storageBucket": st.secrets["firebase"]["storageBucket"],
+    "messagingSenderId": st.secrets["firebase"]["messagingSenderId"],
+    "appId": st.secrets["firebase"]["appId"],
+}
 
-db = firestore.client()
+# Initialize Firebase
+firebase = pyrebase.initialize_app(firebase_config)
+auth = firebase.auth()
+db = firebase.database()
 
 # Initialize Session State
 if "logged_in" not in st.session_state:
@@ -52,32 +58,24 @@ def register_user(email, password, confirm_password):
         st.error("Passwords do not match!")
         return
     try:
-        user = auth.create_user(email=email, password=password)
+        user = auth.create_user_with_email_and_password(email, password)
         st.success("Registration successful! Please log in.")
     except Exception as e:
         st.error(f"Error: {e}")
 
+
 def login_user(email, password, placeholder):
     try:
-        # Verify user credentials with Firebase Authentication
-        user = auth.get_user_by_email(email)
-        
-        # Simulating password validation (Firebase Auth doesn't store plain passwords)
-        if not user:
-            st.error("Invalid credentials or user does not exist.")
-            return
-
+        user = auth.sign_in_with_email_and_password(email, password)
         st.session_state.logged_in = True
         st.session_state.user_email = email
         st.session_state.conversations = []
         st.success(f"Welcome, {email}!")
         placeholder.empty()
         chatbot_ui(placeholder)
-
-    except firebase_admin._auth_utils.UserNotFoundError:
-        st.error("Invalid credentials or user does not exist.")
     except Exception as e:
         st.error(f"Error: {e}")
+
 
 def login_ui(placeholder):
     with placeholder.container():
@@ -106,6 +104,7 @@ def login_ui(placeholder):
                 placeholder.empty()
                 chatbot_ui(placeholder)
 
+
 def chatbot_ui(placeholder):
     with placeholder.container():
         st.sidebar.success(f"Logged in as {st.session_state.user_email}")
@@ -125,7 +124,6 @@ def chatbot_ui(placeholder):
             "llama-3.2-1B-Lora-Fine_Tune-FineTome",
         ]
 
-        # Ensure Gemini model and PDF Reader are available only for logged-in users (not guests)
         if st.session_state.logged_in and st.session_state.user_email != "Guest":
             available_models.append("Gemini-1.5B-with-PDF")
 
@@ -141,8 +139,9 @@ def chatbot_ui(placeholder):
                         try:
                             response = None
                             friendly_instruction = (
-                                "You are a helpful and friendly medical assistant. Please refrain from giving personal, offensive, "
-                                "or abusive answers. Be respectful and professional in your responses."
+                                "You are a helpful and friendly medical assistant. "
+                                "Please refrain from giving personal, offensive, or abusive answers. "
+                                "Be respectful and professional in your responses."
                             )
                             query = friendly_instruction + user_input
 
@@ -167,7 +166,6 @@ def chatbot_ui(placeholder):
                             response = completion.choices[0].message.content
 
                             if response:
-                                # Ensure the bot only responds to medical questions
                                 if "medical" not in user_input.lower():
                                     response = "I am not trained for these types of questions. Please ask me medical-related queries."
 
@@ -189,6 +187,7 @@ def chatbot_ui(placeholder):
                     st.markdown(f"**You:** {convo['query']}")
                     st.markdown(f"**Medi Bot:** {convo['response']}")
                     st.markdown("---")
+
 
 # Main App Logic
 placeholder = st.empty()
