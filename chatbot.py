@@ -1,6 +1,8 @@
 import streamlit as st
 import pyrebase
 from huggingface_hub import InferenceClient
+import requests
+import json
 
 # Firebase Configuration
 firebase_config = {
@@ -147,38 +149,30 @@ def chatbot_ui(placeholder):
                     if user_input.strip():
                         try:
                             response = None
-                            friendly_instruction = (
-                                "You are a helpful and friendly medical assistant. "
-                                "Please refrain from giving personal, offensive, or abusive answers. "
-                                "Be respectful and professional in your responses."
-                            )
-                            query = friendly_instruction + user_input
-
+                            query = f"Medical assistant:\n\n{user_input}"
                             if pdf_context:
                                 query = pdf_context + "\n\n" + query
 
-                            client = InferenceClient(api_key=st.secrets["api"]["huggingface_api_key"])
-                            messages = [{"role": "user", "content": query}]
-
                             if selected_model == "Gemini-1.5B-with-PDF":
-                                model_name = "gemini/Gemini-1.5B-Instruct"
-                                messages = [{"role": "system", "content": "Medical information bot"}] + messages
-                            elif selected_model == "llama-3.2-1B-Lora-Fine_Tune-FineTome":
-                                model_name = "unsloth/Llama-3.2-1B-Instruct"
-                                messages = [{"role": "system", "content": "Medical information bot"}] + messages
-                            elif selected_model == "Mistral-1.5B-medical-QA":
-                                model_name = "mistralai/Mixtral-8x7B-Instruct-v0.1"
-                                messages = [{"role": "system", "content": friendly_instruction}] + messages
-                            elif selected_model == "gemma-mental-health-fine-tune":
-                                model_name = "google/gemma-1.1-2b-it"
+                                gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+                                payload = {"contents": [{"parts": [{"text": query}]}]}
+                                headers = {
+                                    "Authorization": f"Bearer {st.secrets['api']['gemini_api_key']}",
+                                    "Content-Type": "application/json",
+                                }
+                                response = requests.post(
+                                    gemini_url, headers=headers, data=json.dumps(payload)
+                                )
+                                if response.status_code == 200:
+                                    res_data = response.json()
+                                    if res_data and "contents" in res_data:
+                                        response = res_data["contents"][0]["parts"][0]["text"]
+                                    else:
+                                        response = "Unexpected response from Gemini model."
+                                else:
+                                    response = f"Gemini Model error: {response.status_code}"
 
-                            completion = client.chat.completions.create(
-                                model=model_name, messages=messages, max_tokens=700
-                            )
-                            response = completion.choices[0].message.content
-
-                            if response:
-                                st.session_state.conversations.append({"query": user_input, "response": response})
+                            st.session_state.conversations.append({"query": user_input, "response": response})
 
                         except Exception as e:
                             st.error(f"Error: {e}")
