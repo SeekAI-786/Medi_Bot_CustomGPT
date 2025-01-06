@@ -1,8 +1,10 @@
-import streamlit as st
+import os
 import pyrebase
-from huggingface_hub import InferenceClient
 import requests
 import json
+import streamlit as st
+from huggingface_hub import InferenceClient
+import PyPDF2
 
 # Firebase Configuration
 firebase_config = {
@@ -135,7 +137,6 @@ def chatbot_ui(placeholder):
         if selected_model == "Gemini-1.5B-with-PDF":
             uploaded_file = st.file_uploader("Upload a PDF for question-answering:", type="pdf")
             if uploaded_file:
-                import PyPDF2
                 pdf_reader = PyPDF2.PdfReader(uploaded_file)
                 pdf_context = " ".join([page.extract_text() for page in pdf_reader.pages])
                 st.success("PDF content has been loaded successfully!")
@@ -143,6 +144,7 @@ def chatbot_ui(placeholder):
         chat_container = st.empty()
         with st.container():
             user_input = st.text_input("Your message:", placeholder="Type your query here...")
+
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("Generate Response"):
