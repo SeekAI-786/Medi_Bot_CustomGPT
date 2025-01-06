@@ -62,11 +62,10 @@ def register_user(email, password, confirm_password):
         st.error("Passwords do not match!")
         return
     try:
-        user = auth.create_user_with_email_and_password(email, password)
+        auth.create_user_with_email_and_password(email, password)
         st.success("Registration successful! Please log in.")
     except Exception as e:
         st.error(f"Error: {e}")
-
 
 def login_user(email, password, placeholder):
     try:
@@ -79,7 +78,6 @@ def login_user(email, password, placeholder):
         chatbot_ui(placeholder)
     except Exception as e:
         st.error(f"Error: {e}")
-
 
 def login_ui(placeholder):
     with placeholder.container():
@@ -107,7 +105,6 @@ def login_ui(placeholder):
                 st.success("Logged in as Guest 🎉")
                 placeholder.empty()
                 chatbot_ui(placeholder)
-
 
 def chatbot_ui(placeholder):
     with placeholder.container():
@@ -137,9 +134,12 @@ def chatbot_ui(placeholder):
         if selected_model == "Gemini-1.5B-with-PDF":
             uploaded_file = st.file_uploader("Upload a PDF for question-answering:", type="pdf")
             if uploaded_file:
-                pdf_reader = PyPDF2.PdfReader(uploaded_file)
-                pdf_context = " ".join([page.extract_text() for page in pdf_reader.pages])
-                st.success("PDF content has been loaded successfully!")
+                try:
+                    pdf_reader = PyPDF2.PdfReader(uploaded_file)
+                    pdf_context = " ".join([page.extract_text() for page in pdf_reader.pages])
+                    st.success("PDF content has been loaded successfully!")
+                except Exception as e:
+                    st.error(f"Failed to read PDF: {e}")
 
         chat_container = st.empty()
         with st.container():
@@ -192,7 +192,6 @@ def chatbot_ui(placeholder):
                     st.markdown(f"**You:** {convo['query']}")
                     st.markdown(f"**Medi Bot:** {convo['response']}")
                     st.markdown("---")
-
 
 # Main App Logic
 placeholder = st.empty()
