@@ -1,4 +1,3 @@
-# Imports
 import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
@@ -19,6 +18,8 @@ if "user_email" not in st.session_state:
     st.session_state.user_email = ""
 if "conversations" not in st.session_state:
     st.session_state.conversations = []
+if "user_input" not in st.session_state:
+    st.session_state.user_input = ""  # Initialize user input in session state.
 
 # CSS Styling
 st.markdown(
@@ -107,6 +108,7 @@ def chatbot_ui(placeholder):
             st.session_state.logged_in = False
             st.session_state.user_email = ""
             st.session_state.conversations = []
+            st.session_state.user_input = ""  # Reset input on logout
             placeholder.empty()
             login_ui(placeholder)
 
@@ -121,10 +123,10 @@ def chatbot_ui(placeholder):
         selected_model = st.selectbox("Choose a model:", available_models)
 
         chat_container = st.empty()
-        user_input_key = f"user_input_{len(st.session_state.conversations)}"  # Change the key for each query
-
         with st.container():
-            user_input = st.text_input("Your message:", placeholder="Type your query here...", key=user_input_key)
+            # Use st.text_input consistently and maintain state for the field
+            user_input = st.text_input("Your message:", placeholder="Type your query here...", key="user_input")
+            
             col1, col2 = st.columns([3, 1])
             with col1:
                 if st.button("Generate Response"):
@@ -157,8 +159,8 @@ def chatbot_ui(placeholder):
                             if response:
                                 st.session_state.conversations.append({"query": user_input, "response": response})
 
-                            # After submitting, make the input box empty
-                            st.session_state[user_input_key] = ""
+                            # Reset the input field after sending
+                            st.session_state.user_input = ""
 
                         except Exception as e:
                             st.error(f"Error: {e}")
