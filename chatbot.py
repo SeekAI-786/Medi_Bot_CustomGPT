@@ -1,9 +1,6 @@
 import streamlit as st
 import pyrebase
 from huggingface_hub import InferenceClient
-import requests
-import json
-import PyPDF2
 
 # Firebase Configuration
 firebase_config = {
@@ -127,6 +124,9 @@ def chatbot_ui(placeholder):
             "llama-3.2-1B-Lora-Fine_Tune-FineTome",
         ]
 
+        if st.session_state.logged_in and st.session_state.user_email != "Guest":
+            available_models.append("Gemini-1.5B-with-PDF")
+
         selected_model = st.selectbox("Choose a model:", available_models)
 
         chat_container = st.empty()
@@ -138,22 +138,38 @@ def chatbot_ui(placeholder):
                     if user_input.strip():
                         try:
                             response = None
-                            query = f"Medical assistant:\n\n{user_input}"
+                            friendly_instruction = (
+                                "You are a helpful and friendly medical assistant. "
+                                "Please refrain from giving personal, offensive, or abusive answers. "
+                                "Be respectful and professional in your responses."
+                            )
+                            query = friendly_instruction + user_input
 
-                            # Removed the PDF context handling for the Gemini model
-                            
-                            # Now, process the query based on selected model
-                            if selected_model == "Mistral-1.5B-medical-QA":
-                                # Replace this with your call to the selected model
-                                response = "Mistral model response here."
+                            client = InferenceClient(api_key=st.secrets["api"]["huggingface_api_key"])
+                            messages = [{"role": "user", "content": query}]
 
-                            elif selected_model == "gemma-mental-health-fine-tune":
-                                response = "Gemma mental health fine-tuned model response here."
-
+                            if selected_model == "Gemini-1.5B-with-PDF":
+                                model_name = "gemini/Gemini-1.5B-Instruct"
+                                messages = [{"role": "system", "content": "Medical information bot"}] + messages
                             elif selected_model == "llama-3.2-1B-Lora-Fine_Tune-FineTome":
-                                response = "Llama fine-tuned model response here."
+                                model_name = "unsloth/Llama-3.2-1B-Instruct"
+                                messages = [{"role": "system", "content": "Medical information bot"}] + messages
+                            elif selected_model == "Mistral-1.5B-medical-QA":
+                                model_name = "mistralai/Mixtral-8x7B-Instruct-v0.1"
+                                messages = [{"role": "system", "content": friendly_instruction}] + messages
+                            elif selected_model == "gemma-mental-health-fine-tune":
+                                model_name = "google/gemma-1.1-2b-it"
 
-                            st.session_state.conversations.append({"query": user_input, "response": response})
+                            completion = client.chat.completions.create(
+                                model=model_name, messages=messages, max_tokens=700
+                            )
+                            response = completion.choices[0].message.content
+
+                            if response:
+                                if "medical" not in user_input.lower():
+                                    response = "I am not trained for these types of questions. Please ask me medical-related queries."
+
+                                st.session_state.conversations.append({"query": user_input, "response": response})
 
                         except Exception as e:
                             st.error(f"Error: {e}")
