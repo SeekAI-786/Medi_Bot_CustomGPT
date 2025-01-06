@@ -1,21 +1,15 @@
 import streamlit as st
-import pyrebase
+import firebase_admin
+from firebase_admin import credentials, auth, firestore
 from huggingface_hub import InferenceClient
 
-# Firebase Configuration
-firebase_config = {
-    "apiKey": st.secrets["firebase"]["apiKey"],
-    "authDomain": st.secrets["firebase"]["authDomain"],
-    "projectId": st.secrets["firebase"]["projectId"],
-    "storageBucket": st.secrets["firebase"]["storageBucket"],
-    "messagingSenderId": st.secrets["firebase"]["messagingSenderId"],
-    "appId": st.secrets["firebase"]["appId"],
-}
+# Initialize Firebase Admin SDK
+cred = credentials.Certificate(st.secrets["firebase"]["credentials_json"])
+firebase_admin.initialize_app(cred)
 
-# Initialize Firebase
-firebase = pyrebase.initialize_app(firebase_config)
-auth = firebase.auth()
-db = firebase.database()
+# Initialize Firestore and Auth
+db = firestore.client()
+auth = firebase_admin.auth
 
 # Initialize Session State
 if "logged_in" not in st.session_state:
@@ -119,7 +113,6 @@ def chatbot_ui(placeholder):
         st.caption("Your personalized medical assistant.")
 
         available_models = [
-            "gemma-mental-health-fine-tune",
             "Mistral-1.5B-medical-QA",
             "llama-3.2-1B-Lora-Fine_Tune-FineTome",
         ]
@@ -148,17 +141,12 @@ def chatbot_ui(placeholder):
                             client = InferenceClient(api_key=st.secrets["api"]["huggingface_api_key"])
                             messages = [{"role": "user", "content": query}]
 
-                            if selected_model == "Gemini-1.5B-with-PDF":
-                                model_name = "gemini/Gemini-1.5B-Instruct"
-                                messages = [{"role": "system", "content": "Medical information bot"}] + messages
-                            elif selected_model == "llama-3.2-1B-Lora-Fine_Tune-FineTome":
+                            if selected_model == "llama-3.2-1B-Lora-Fine_Tune-FineTome":
                                 model_name = "unsloth/Llama-3.2-1B-Instruct"
                                 messages = [{"role": "system", "content": "Medical information bot"}] + messages
                             elif selected_model == "Mistral-1.5B-medical-QA":
                                 model_name = "mistralai/Mixtral-8x7B-Instruct-v0.1"
                                 messages = [{"role": "system", "content": friendly_instruction}] + messages
-                            elif selected_model == "gemma-mental-health-fine-tune":
-                                model_name = "google/gemma-1.1-2b-it"
 
                             completion = client.chat.completions.create(
                                 model=model_name, messages=messages, max_tokens=700
