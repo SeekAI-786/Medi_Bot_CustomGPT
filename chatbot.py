@@ -24,22 +24,10 @@ if "conversations" not in st.session_state:
 if "gemini_pdf_content" not in st.session_state:
     st.session_state.gemini_pdf_content = ""
 
-# CSS Styling for proper alignment
+# CSS Styling
 st.markdown(
     """
     <style>
-    .success-response {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 10px;
-        text-align: center;
-    }
     .fixed-container {
         display: flex;
         flex-direction: column;
@@ -138,10 +126,10 @@ def chatbot_ui(placeholder):
         ]
         selected_model = st.selectbox("Choose a model:", available_models)
 
-        # Gemini-specific PDF Upload (Optional, shown if Gemini model is selected)
+        # Gemini-specific PDF Upload
         if selected_model == "Gemini Model":
-            st.subheader("📄 Upload PDF for Context")
-            gemini_pdf_uploaded = st.file_uploader("Upload a PDF (Optional)", type=["pdf"])
+            st.subheader("📄 Upload PDF for Gemini Model")
+            gemini_pdf_uploaded = st.file_uploader("Upload a PDF for Context", type=["pdf"])
             if gemini_pdf_uploaded:
                 try:
                     with pdfplumber.open(gemini_pdf_uploaded) as pdf:
@@ -197,7 +185,7 @@ def chatbot_ui(placeholder):
 
                         if response:
                             st.session_state.conversations.append({"query": user_input, "response": response})
-                            st.markdown('<div class="success-response">Response generated!</div>', unsafe_allow_html=True)
+                            st.success("Response generated!")
                     except Exception as e:
                         st.error(f"Error: {e}")
                 else:
@@ -211,8 +199,8 @@ def chatbot_ui(placeholder):
         if st.session_state.conversations:
             st.subheader("📝 Conversation History")
             for convo in st.session_state.conversations:
-                st.markdown(f"*You:* {convo['query']}")
-                st.markdown(f"*Medi Bot:* {convo['response']}")
+                st.markdown(f"You: {convo['query']}")
+                st.markdown(f"Medi Bot: {convo['response']}")
                 st.markdown("---")
 
 # Main App Logic
