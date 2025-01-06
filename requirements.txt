@@ -3,3 +3,4 @@ huggingface_hub
 requests
 pdfplumber
 firebase_admin
+pyrebase
