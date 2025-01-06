@@ -122,8 +122,8 @@ def chatbot_ui(placeholder):
 
         chat_container = st.empty()
         with st.container():
-            user_input = st.text_input("Your message:", placeholder="Type your query here...")
-            col1, col2 = st.columns(2)
+            user_input = st.text_input("Your message:", placeholder="Type your query here...", key="user_input")
+            col1, col2 = st.columns([3, 1])
             with col1:
                 if st.button("Generate Response"):
                     if user_input.strip():
@@ -155,6 +155,8 @@ def chatbot_ui(placeholder):
                             if response:
                                 st.session_state.conversations.append({"query": user_input, "response": response})
 
+                            # Reset the input field after generating a response
+                            st.session_state.user_input = ""
                         except Exception as e:
                             st.error(f"Error: {e}")
                     else:
