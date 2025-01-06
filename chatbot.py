@@ -129,6 +129,15 @@ def chatbot_ui(placeholder):
 
         selected_model = st.selectbox("Choose a model:", available_models)
 
+        pdf_context = ""
+        if selected_model == "Gemini-1.5B-with-PDF":
+            uploaded_file = st.file_uploader("Upload a PDF for question-answering:", type="pdf")
+            if uploaded_file:
+                import PyPDF2
+                pdf_reader = PyPDF2.PdfReader(uploaded_file)
+                pdf_context = " ".join([page.extract_text() for page in pdf_reader.pages])
+                st.success("PDF content has been loaded successfully!")
+
         chat_container = st.empty()
         with st.container():
             user_input = st.text_input("Your message:", placeholder="Type your query here...")
@@ -144,6 +153,9 @@ def chatbot_ui(placeholder):
                                 "Be respectful and professional in your responses."
                             )
                             query = friendly_instruction + user_input
+
+                            if pdf_context:
+                                query = pdf_context + "\n\n" + query
 
                             client = InferenceClient(api_key=st.secrets["api"]["huggingface_api_key"])
                             messages = [{"role": "user", "content": query}]
@@ -166,9 +178,6 @@ def chatbot_ui(placeholder):
                             response = completion.choices[0].message.content
 
                             if response:
-                                if "medical" not in user_input.lower():
-                                    response = "I am not trained for these types of questions. Please ask me medical-related queries."
-
                                 st.session_state.conversations.append({"query": user_input, "response": response})
 
                         except Exception as e:
