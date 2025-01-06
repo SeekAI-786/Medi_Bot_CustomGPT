@@ -3,6 +3,7 @@ import firebase_admin
 from firebase_admin import credentials, auth, firestore
 from huggingface_hub import InferenceClient
 import requests
+import pdfplumber
 import json
 
 # Firebase Initialization
@@ -21,9 +22,9 @@ if "user_email" not in st.session_state:
 if "conversations" not in st.session_state:
     st.session_state.conversations = []
 if "gemini_pdf_content" not in st.session_state:
-    st.session_state.gemini_pdf_content = ""  # For Gemini PDF content handling
+    st.session_state.gemini_pdf_content = ""
 
-# CSS Styling for Consistent Layout
+# CSS Styling
 st.markdown(
     """
     <style>
@@ -125,12 +126,11 @@ def chatbot_ui(placeholder):
         ]
         selected_model = st.selectbox("Choose a model:", available_models)
 
-        # Optional PDF Upload for Gemini Model
+        # Gemini-specific PDF Upload
         if selected_model == "Gemini Model":
-            st.subheader("📄 Upload PDF for Context")
-            gemini_pdf_uploaded = st.file_uploader("Upload a PDF (Optional)", type=["pdf"])
+            st.subheader("📄 Upload PDF for Gemini Model")
+            gemini_pdf_uploaded = st.file_uploader("Upload a PDF for Context", type=["pdf"])
             if gemini_pdf_uploaded:
-                import pdfplumber
                 try:
                     with pdfplumber.open(gemini_pdf_uploaded) as pdf:
                         pdf_text = ''.join(page.extract_text() for page in pdf.pages)
@@ -139,71 +139,69 @@ def chatbot_ui(placeholder):
                 except Exception as e:
                     st.error(f"PDF Processing Error: {e}")
 
-        chat_container = st.empty()
+        # Chat Interaction
+        user_input = st.text_input("Your message:", placeholder="Type your query here...", key="user_input")
 
-        with st.container():
-            user_input = st.text_input("Your message:", placeholder="Type your query here...")
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            if st.button("Generate Response"):
+                if user_input.strip():
+                    try:
+                        response = None
+                        if selected_model == "Gemini Model":
+                            gemini_api_key = st.secrets["api"].get("gemini_api_key")
+                            if gemini_api_key:
+                                gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
 
-            col1, col2 = st.columns([3, 1])
-            with col1:
-                if st.button("Generate Response"):
-                    if user_input.strip():
-                        try:
-                            response = None
-
-                            if selected_model == "Gemini Model":
-                                gemini_api_key = st.secrets["api"]["gemini_api_key"]
-                                gemini_url = "https://generativelanguage.googleapis.com/v1beta2/models/gemini-1.5:generateContent"
-                                # Using extracted PDF content if available
-                                query = (
+                                combined_query = (
                                     f"Context from PDF:\n\n{st.session_state.gemini_pdf_content}\n\nUser Query:\n{user_input}"
-                                    if st.session_state.gemini_pdf_content
-                                    else user_input
+                                    if st.session_state.gemini_pdf_content else user_input
                                 )
-                                payload = {"contents": [{"parts": [{"text": query}]}]}
-                                headers = {"Authorization": f"Bearer {gemini_api_key}", "Content-Type": "application/json"}
+                                payload = {"contents": [{"parts": [{"text": combined_query}]}]}
+                                headers = {"Content-Type": "application/json"}
 
-                                gemini_response = requests.post(gemini_url, headers=headers, data=json.dumps(payload))
+                                gemini_response = requests.post(
+                                    f"{gemini_url}?key={gemini_api_key}",
+                                    headers=headers,
+                                    data=json.dumps(payload),
+                                )
                                 gemini_response.raise_for_status()
                                 response_data = gemini_response.json()
-                                response = response_data.get("candidates", [{}])[0].get("parts", [{}])[0].get("text", "")
+                                response = response_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
 
-                            else:  # Handle other models
-                                friendly_instruction = "You are a professional medical assistant. Provide accurate and respectful responses."
-                                query = friendly_instruction + user_input
+                        else:
+                            # Handle other models with Hugging Face
+                            friendly_instruction = "You are a friendly medical assistant."
+                            query = f"{friendly_instruction}\n\n{user_input}"
 
-                                model_mappings = {
-                                    "llama-3.2-1B-Lora-Fine_Tune-FineTome": "unsloth/Llama-3.2-1B-Instruct",
-                                    "Mistral-1.5B-medical-QA": "mistralai/Mixtral-8x7B-Instruct-v0.1",
-                                    "gemma-mental-health-fine-tune": "google/gemma-1.1-2b-it",
-                                }
-                                model_name = model_mappings[selected_model]
+                            client = InferenceClient(api_key=st.secrets["api"]["huggingface_api_key"])
+                            messages = [{"role": "user", "content": query}]
+                            completion = client.chat.completions.create(
+                                model=selected_model,
+                                messages=messages,
+                                max_tokens=700,
+                            )
+                            response = completion.choices[0].message.content
 
-                                client = InferenceClient(api_key=st.secrets["api"]["huggingface_api_key"])
-                                messages = [{"role": "system", "content": "Medical Bot"}, {"role": "user", "content": query}]
-                                completion = client.chat.completions.create(model=model_name, messages=messages, max_tokens=700)
-                                response = completion.choices[0].message.content
+                        if response:
+                            st.session_state.conversations.append({"query": user_input, "response": response})
+                            st.success("Response generated!")
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+                else:
+                    st.warning("Please enter a message.")
+        with col2:
+            if st.button("Clear Conversation History"):
+                st.session_state.conversations = []
+                st.success("Conversation history cleared.")
 
-                            if response:
-                                st.session_state.conversations.append({"query": user_input, "response": response})
-
-                        except Exception as e:
-                            st.error(f"Error: {e}")
-                    else:
-                        st.warning("Please enter a message.")
-            with col2:
-                if st.button("Clear Conversation History"):
-                    st.session_state.conversations = []
-                    st.success("Conversation history cleared.")
-
-        # Conversation History
-        with chat_container.container():
-            if st.session_state.conversations:
-                st.subheader("📝 Conversation History")
-                for convo in st.session_state.conversations:
-                    st.markdown(f"You: {convo['query']}")
-                    st.markdown(f"Medi Bot: {convo['response']}")
-                    st.markdown("---")
+        # Display Conversation History
+        if st.session_state.conversations:
+            st.subheader("📝 Conversation History")
+            for convo in st.session_state.conversations:
+                st.markdown(f"You: {convo['query']}")
+                st.markdown(f"Medi Bot: {convo['response']}")
+                st.markdown("---")
 
 # Main App Logic
 placeholder = st.empty()
