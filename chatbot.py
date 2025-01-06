@@ -121,8 +121,10 @@ def chatbot_ui(placeholder):
         selected_model = st.selectbox("Choose a model:", available_models)
 
         chat_container = st.empty()
+        user_input_key = f"user_input_{len(st.session_state.conversations)}"  # Change the key for each query
+
         with st.container():
-            user_input = st.text_input("Your message:", placeholder="Type your query here...", key="user_input")
+            user_input = st.text_input("Your message:", placeholder="Type your query here...", key=user_input_key)
             col1, col2 = st.columns([3, 1])
             with col1:
                 if st.button("Generate Response"):
@@ -155,8 +157,9 @@ def chatbot_ui(placeholder):
                             if response:
                                 st.session_state.conversations.append({"query": user_input, "response": response})
 
-                            # Reset the input field after generating a response
-                            st.session_state.user_input = ""
+                            # After submitting, make the input box empty
+                            st.session_state[user_input_key] = ""
+
                         except Exception as e:
                             st.error(f"Error: {e}")
                     else:
