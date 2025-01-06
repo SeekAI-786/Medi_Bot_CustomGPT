@@ -199,9 +199,9 @@ def chatbot_ui(placeholder):
         if st.session_state.conversations:
             st.subheader("📝 Conversation History")
         for convo in reversed(st.session_state.conversations):
-        st.markdown(f"You: {convo['query']}")
-        st.markdown(f"Medi Bot: {convo['response']}")
-        st.markdown("---")
+            st.markdown(f"You: {convo['query']}")
+            st.markdown(f"Medi Bot: {convo['response']}")
+            st.markdown("---")
 
 
 # Main App Logic
