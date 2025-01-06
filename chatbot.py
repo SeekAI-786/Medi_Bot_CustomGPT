@@ -152,7 +152,7 @@ def chatbot_ui(placeholder):
                                 model_name = "google/gemma-1.1-2b-it"
 
                             completion = client.chat.completions.create(
-                                model=model_name, messages=messages, max_tokens=700
+                                model=model_name, messages=messages, max_tokens=1000
                             )
                             response = completion.choices[0].message.content
 
