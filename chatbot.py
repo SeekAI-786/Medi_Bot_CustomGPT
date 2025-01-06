@@ -154,6 +154,7 @@ def chatbot_ui(placeholder):
                             if selected_model == "Gemini Model":
                                 gemini_api_key = st.secrets["api"]["gemini_api_key"]
                                 gemini_url = "https://generativelanguage.googleapis.com/v1beta2/models/gemini-1.5:generateContent"
+                                # Using extracted PDF content if available
                                 query = (
                                     f"Context from PDF:\n\n{st.session_state.gemini_pdf_content}\n\nUser Query:\n{user_input}"
                                     if st.session_state.gemini_pdf_content
