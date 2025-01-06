@@ -38,6 +38,8 @@ st.markdown(
         border: 1px solid #ddd;
         border-radius: 5px;
         background-color: #f9f9f9;
+        height: 70vh;  /* Keep this fixed height */
+        margin-bottom: 10px;
     }
     .input-container {
         width: 100%;
@@ -122,12 +124,23 @@ def chatbot_ui(placeholder):
         ]
         selected_model = st.selectbox("Choose a model:", available_models)
 
-        chat_container = st.empty()
-        with st.container():
-            # Use st.text_input without the key binding and rely on session state to store user input
+        chat_container = st.container()
+        input_container = st.container()
+
+        with chat_container:
+            # Conversation display container (fixed position for chat)
+            st.subheader("📝 Conversation History")
+            if st.session_state.conversations:
+                for convo in reversed(st.session_state.conversations):
+                    st.markdown(f"You: {convo['query']}")
+                    st.markdown(f"Medi Bot: {convo['response']}")
+                    st.markdown("---")
+
+        with input_container:
+            # Chat message input container (fixed position for input field)
             user_input = st.text_input("Your message:", placeholder="Type your query here...")
             st.session_state.user_input = user_input  # Store the value in session state
-            
+
             col1, col2 = st.columns([3, 1])
             with col1:
                 if st.button("Generate Response"):
@@ -167,18 +180,11 @@ def chatbot_ui(placeholder):
                             st.error(f"Error: {e}")
                     else:
                         st.warning("Please enter a message.")
+
             with col2:
                 if st.button("Clear Conversation History"):
                     st.session_state.conversations = []
                     st.success("Conversation history cleared.")
-
-        with chat_container.container():
-            if st.session_state.conversations:
-                st.subheader("📝 Conversation History")
-                for convo in st.session_state.conversations:
-                    st.markdown(f"You: {convo['query']}")
-                    st.markdown(f"Medi Bot: {convo['response']}")
-                    st.markdown("---")
 
 # Main App Logic
 placeholder = st.empty()
