@@ -2,6 +2,8 @@ import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
 from huggingface_hub import InferenceClient
+import requests
+import json
 
 # Firebase Initialization
 firebase_config = dict(st.secrets["firebase"])
@@ -18,10 +20,10 @@ if "user_email" not in st.session_state:
     st.session_state.user_email = ""
 if "conversations" not in st.session_state:
     st.session_state.conversations = []
-if "user_input" not in st.session_state:
-    st.session_state.user_input = ""  # Initialize user input in session state.
+if "gemini_pdf_content" not in st.session_state:
+    st.session_state.gemini_pdf_content = ""  # For Gemini PDF content handling
 
-# CSS Styling
+# CSS Styling for Consistent Layout
 st.markdown(
     """
     <style>
@@ -108,6 +110,7 @@ def chatbot_ui(placeholder):
             st.session_state.logged_in = False
             st.session_state.user_email = ""
             st.session_state.conversations = []
+            st.session_state.gemini_pdf_content = ""
             placeholder.empty()
             login_ui(placeholder)
 
@@ -118,43 +121,67 @@ def chatbot_ui(placeholder):
             "gemma-mental-health-fine-tune",
             "Mistral-1.5B-medical-QA",
             "llama-3.2-1B-Lora-Fine_Tune-FineTome",
+            "Gemini Model",
         ]
         selected_model = st.selectbox("Choose a model:", available_models)
+
+        # Optional PDF Upload for Gemini Model
+        if selected_model == "Gemini Model":
+            st.subheader("📄 Upload PDF for Context")
+            gemini_pdf_uploaded = st.file_uploader("Upload a PDF (Optional)", type=["pdf"])
+            if gemini_pdf_uploaded:
+                import pdfplumber
+                try:
+                    with pdfplumber.open(gemini_pdf_uploaded) as pdf:
+                        pdf_text = ''.join(page.extract_text() for page in pdf.pages)
+                        st.session_state.gemini_pdf_content = pdf_text
+                        st.success("PDF successfully processed.")
+                except Exception as e:
+                    st.error(f"PDF Processing Error: {e}")
 
         chat_container = st.empty()
 
         with st.container():
-            # Use text_input directly with key, and update session state when required
-            user_input = st.text_input("Your message:", placeholder="Type your query here...", key="user_input")
+            user_input = st.text_input("Your message:", placeholder="Type your query here...")
 
             col1, col2 = st.columns([3, 1])
             with col1:
                 if st.button("Generate Response"):
-                    if user_input.strip():  # user_input from st.text_input widget
+                    if user_input.strip():
                         try:
                             response = None
-                            friendly_instruction = (
-                                "You are a helpful and friendly medical assistant. Please refrain from giving personal, offensive, "
-                                "or abusive answers. Be respectful and professional in your responses."
-                            )
-                            query = friendly_instruction + user_input  # Use directly from widget
 
-                            client = InferenceClient(api_key=st.secrets["api"]["huggingface_api_key"])
-                            messages = [{"role": "user", "content": query}]
+                            if selected_model == "Gemini Model":
+                                gemini_api_key = st.secrets["api"]["gemini_api_key"]
+                                gemini_url = "https://generativelanguage.googleapis.com/v1beta2/models/gemini-1.5:generateContent"
+                                query = (
+                                    f"Context from PDF:\n\n{st.session_state.gemini_pdf_content}\n\nUser Query:\n{user_input}"
+                                    if st.session_state.gemini_pdf_content
+                                    else user_input
+                                )
+                                payload = {"contents": [{"parts": [{"text": query}]}]}
+                                headers = {"Authorization": f"Bearer {gemini_api_key}", "Content-Type": "application/json"}
 
-                            if selected_model == "llama-3.2-1B-Lora-Fine_Tune-FineTome":
-                                model_name = "unsloth/Llama-3.2-1B-Instruct"
-                                messages = [{"role": "system", "content": "Medical information bot"}] + messages
-                            elif selected_model == "Mistral-1.5B-medical-QA":
-                                model_name = "mistralai/Mixtral-8x7B-Instruct-v0.1"
-                                messages = [{"role": "system", "content": friendly_instruction}] + messages
-                            elif selected_model == "gemma-mental-health-fine-tune":
-                                model_name = "google/gemma-1.1-2b-it"
+                                gemini_response = requests.post(gemini_url, headers=headers, data=json.dumps(payload))
+                                gemini_response.raise_for_status()
+                                response_data = gemini_response.json()
+                                response = response_data.get("candidates", [{}])[0].get("parts", [{}])[0].get("text", "")
 
-                            completion = client.chat.completions.create(
-                                model=model_name, messages=messages, max_tokens=700
-                            )
-                            response = completion.choices[0].message.content
+                            else:  # Handle other models
+                                friendly_instruction = "You are a professional medical assistant. Provide accurate and respectful responses."
+                                query = friendly_instruction + user_input
+
+                                model_mappings = {
+                                    "llama-3.2-1B-Lora-Fine_Tune-FineTome": "unsloth/Llama-3.2-1B-Instruct",
+                                    "Mistral-1.5B-medical-QA": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+                                    "gemma-mental-health-fine-tune": "google/gemma-1.1-2b-it",
+                                }
+                                model_name = model_mappings[selected_model]
+
+                                client = InferenceClient(api_key=st.secrets["api"]["huggingface_api_key"])
+                                messages = [{"role": "system", "content": "Medical Bot"}, {"role": "user", "content": query}]
+                                completion = client.chat.completions.create(model=model_name, messages=messages, max_tokens=700)
+                                response = completion.choices[0].message.content
 
                             if response:
                                 st.session_state.conversations.append({"query": user_input, "response": response})
@@ -168,6 +195,7 @@ def chatbot_ui(placeholder):
                     st.session_state.conversations = []
                     st.success("Conversation history cleared.")
 
+        # Conversation History
         with chat_container.container():
             if st.session_state.conversations:
                 st.subheader("📝 Conversation History")
