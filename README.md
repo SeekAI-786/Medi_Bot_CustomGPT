@@ -69,7 +69,7 @@ E-->B
 
 ---
 
-# Fine-Tuned Models
+# Fine Tuned Models
 
 The following models were developed as part of this project and published on Hugging Face.
 
